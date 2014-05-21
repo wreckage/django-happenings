@@ -19,7 +19,7 @@ Coming soon:
 * more views, including an agenda view
 * support for users
 * support for cancelled events
-* + more
+* ++ more
 
 
 Dependencies
@@ -70,7 +70,7 @@ Quick Install
    your database is properly configured to use time zones.
 
 6. Run the development server and go to ``127.0.0.1:8000/admin/`` to
-    create and manage events.
+create and manage events.
 
 7. Check out the calendar at ``127.0.0.1:8000/calendar/``.
 
