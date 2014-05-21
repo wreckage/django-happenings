@@ -2,6 +2,8 @@
 Django Happenings
 =================
 
+|travis| |coverage|
+
 An event calendar app for Django.
 
 Features:
@@ -164,3 +166,10 @@ Tests
 
 More To Come!
 -------------
+
+.. |travis| image:: https://travis-ci.org/wreckage/django-happenings.svg?branch=master
+   :alt: Build Status - master branch
+   :target: https://travis-ci.org/wreckage/django-happenings
+.. |coverage| image:: https://coveralls.io/repos/wreckage/django-happenings/badge.png?branch=master
+   :alt: Coverage Status
+   :target: https://coveralls.io/r/wreckage/django-happenings?branch=master
