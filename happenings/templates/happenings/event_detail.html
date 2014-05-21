@@ -1,0 +1,72 @@
+{% extends 'happenings/middle.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <h1>Event Detail</h1>
+        <h2>{{ event.title }}</h2>
+
+        {% if event.all_day %}
+            <h3>This is an all day event</h3>
+        {% endif %}
+
+        {% if next_event %}
+        <h3>This event repeats {{ repeat | lower }}.</h3>
+            <p>
+                Next event date: 
+                <b>
+                {{ next_event.month }} {{ next_event.day }}, {{ next_event.year }} 
+                {{ event.start_date|date:"g:i a" }} -
+                {{ event.end_date|date:"g:i a e" }}
+            </b>(today is: {% now "SHORT_DATE_FORMAT" %})</p>
+        {% elif last_event %}
+            <h3>This was an event that repeated {{ repeat | lower }}.</h3>
+            <p>The last event was on {{ last_event }}</p>
+        {% else %}
+            <p>When:
+            {% if event.start_date.day == event.end_date.day %}
+            <b>{{ event.start_date }} - {{ event.end_date|date:"g:i a e" }}</p></b>
+            {% else %}
+            <b>Start date: {{ event.start_date }}</b></p>
+            <p><b>End date: {{ event.end_date }}</b></p>
+            {% endif %}
+        {% endif %}
+        {% if event.location.all %}
+        <p>Location{{ event.location.all|pluralize }}:<br>
+        {% for l in event.location.all %}
+            {{ l.name }}<br>
+            {% if l.address_line_1 %}{{ l.address_line_1 }}<br>{% endif %}
+            {% if l.address_line_2 %}{{ l.address_line_2 }}<br>{% endif %}
+            {% if l.address_line_3 %}{{ l.address_line_3 }}<br>{% endif %}
+            {% if l.city %}{{ l.city }},{% endif %} 
+            {% if l.state %}{{ l.state }}{% endif %} 
+            {% if l.zipcode %}{{ l.zipcode }}<br>{% endif %}
+            {% if l.country %}{{ l.country }}<br>{% endif %}
+        {% endfor %}
+        </p>
+        {% endif %}
+
+        {% if event.featured_image %}
+            <p><img class="event-featured-image" src="{{ event.featured_image.url }}"></p>
+        {% endif %}
+
+        <p>{{ event.description }}</p>
+
+        {% if event.categories.all %}
+            Categor{{ event.categories.all|pluralize:"y,ies" }}:
+            <ul>
+                {% for category in event.categories.all %}
+                <li>{{ category.title }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if event.tags.all %}
+            Tag{{ event.tags.all|pluralize }}:
+            <ul>
+                {% for tag in event.tags.all %}
+                <li>{{ tag.name }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+{% endblock content %}

@@ -1,0 +1,119 @@
+table.month {
+    position: relative;
+    text-decoration: none !important;
+    color: black !important;
+    table-layout: fixed;
+    width: 100%;
+    max-width: 800px;
+    margin: auto;
+}
+/* Mini Calendar Styles */
+.calendar-mini {
+    max-width: 480px;
+}
+.calendar-mini td {
+    padding-bottom: 0px;
+    height: inherit;
+    background: #fff;
+}
+.calendar-mini .td-inner {
+    position: relative;
+    overflow: visible;
+    margin-bottom: 32px;
+}
+.calendar-mini > table > tbody > tr > td > a {
+    position: relative;
+    bottom: 16px;
+}
+.calendar-mini .calendar-event {
+    position: absolute;
+    margin: 0px;
+    width: auto;
+    top: 15px;
+    left: 16px;
+    border-radius: 20px;
+    padding: 9px;
+}
+/* End Mini Calendar Styles */
+
+#event-calendar {
+    margin-bottom: 20px;
+}
+table.month > tr {
+    background: #fff;
+    height: 20px;
+}
+table.month tr {
+    background: #fff;
+}
+table.month th {
+    text-align: center;
+}
+th.month {
+    padding: 5px;
+    background: #eee;
+}
+.month-arrow-left, .month-arrow-right {
+    border: 1px solid #eee;
+    background: #fff;
+}
+td.noday {
+    background: #eee !important;
+}
+.td-inner {
+    overflow: auto;
+    margin-bottom: 40px;
+    position: relative;
+}
+.td-inner > a {
+    color: #000;
+    text-decoration: underline;
+}
+table.month td {
+    border: 1px solid #ccc;
+    text-align: left;
+    overflow: hidden;
+    vertical-align: top;
+    background-color: #fff;
+}
+.calendar-event {
+    //width: 100px;
+    margin-left: 3px;
+    margin: 5px;
+    font-size: 0.8em;
+    background: #eee;
+    padding: 3px;
+    cursor: pointer;
+}
+.calendar-today {
+    background: #acf !important;
+}
+.event-anch {
+    text-decoration: none !important;
+}
+
+.calendar-list {
+    padding: 0px;
+    max-width: 450px;
+}
+
+.month-event-title {
+    display: inline;
+}
+.month-event {
+    border: 1px solid black;
+    list-style-type: none;
+    margin: 5px;
+}
+.date-widget {
+    display: inline-block;
+    text-align: center;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin: 5px;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+.popover-title {
+    font-weight: bold;
+}

@@ -1,0 +1,52 @@
+{% extends 'happenings/middle.html' %}
+{% load staticfiles i18n %}
+
+{% block content %}
+
+    {% if cal_error %}
+        {{ cal_error }}
+    {% endif %}
+    
+    <a href="{% url "calendar:list" %}{{ year }}/{{ month_num }}/">
+        &larr; {% trans "Back to calendar" %}
+    </a>
+    
+    <h1>
+        {% trans "Events" %}<br>
+    {% if cal_category and cal_tag %}
+            {% blocktrans with c=cal_category t=cal_tag %}
+            in category <span id="cal-day-category">{{ c }}</span>
+            with tag <span id="cal-day-tag">{{ t }}</span>
+            {% endblocktrans %}
+    {% elif cal_category %}
+            {% blocktrans with c=cal_category t=cal_tag %}
+            with category <span id="cal-day-category">{{ c }}</span>
+            {% endblocktrans %}
+    {% elif cal_tag %}
+            {% blocktrans with c=cal_category t=cal_tag %}
+            with tag = <span id="cal-day-tag">{{ t }}</span>
+            {% endblocktrans %}
+    {% endif %}
+    </h1>
+    
+    <h2>{% trans "For" %} 
+        <span id="cal-day-mo">{{ month }}</span> 
+        <span id="cal-day-day">{{ day }}</span>, 
+        <span id="cal-day-year">{{ year }}</span>
+    </h2>
+        <a id="cal-day-prev" class="cal-day" href="{{ request.path }}?cal_prev={{ prev }}">
+            {% trans "Prev Day" %}
+        </a> | 
+        <a id="cal-day-next" class="cal-day" href="{{ request.path }}?cal_next={{ next }}">
+            {% trans "Next Day" %}
+        </a>
+    
+        <ul class="day-event-list">
+            {% for event in events %}
+                <li><a href="{{ event.get_absolute_url }}">{{ event.title }}</a></li>
+            {% empty %}
+                {% trans "Oops.. No events!" %}
+            {% endfor %}
+        </ul>
+    
+{% endblock content %}

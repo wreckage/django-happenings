@@ -1,0 +1,97 @@
+# This test file was created to fill in the untested portions of
+# utils/handlers.py. Most of the tests for handlers.py are in integration_tests
+
+from collections import defaultdict
+from datetime import date
+
+from happenings.utils.handlers import (
+    _repeat_weekdays,
+    _repeat_reverse,
+    _chunk_fill_out_first_week
+)
+from tests.integration_tests.event_factory import create_event, SetMeUp
+
+
+class TestHandlers(SetMeUp):
+    """Tests the handlers for repeating events."""
+    def setUp(self):
+        self.counter = defaultdict(list)
+        self.year = 2014
+        self.month = 5
+
+    def test_repeat_weekdays_day_out_of_range(self):
+        """Should return unchanged dict."""
+        day = 32
+        end_repeat = None
+        event = create_event(
+            start_date=(2014, 5, 28),
+            end_date=(2014, 5, 28),
+            created_by=self.user,
+            title="event",
+            description="Testing 1 2 3",
+            repeat="WEEKDAY",
+        )
+        c = _repeat_weekdays(
+            self.counter, self.year, self.month, day, end_repeat, event
+        )
+        self.assertEqual(len(c), 0)
+
+    def test_repeat_weekdays_count_first_day(self):
+        """Should return dict w/ first day counted."""
+        day = 28
+        end_repeat = date(2014, 7, 7)
+        event = create_event(
+            start_date=(2014, 5, 28),
+            end_date=(2014, 5, 28),
+            created_by=self.user,
+            title="event",
+            description="Testing 1 2 3",
+            repeat="WEEKDAY",
+        )
+        c = _repeat_weekdays(
+            self.counter, self.year, self.month, day, end_repeat, event,
+            count_first=True
+        )
+        self.assertEqual(len(c), 3)
+        self.assertEqual(c[28], [('event', event.pk)])
+        self.assertEqual(c[29], [('event', event.pk)])
+        self.assertEqual(c[30], [('event', event.pk)])
+
+    def test_chunk_fill_out_first_week_stops_on_end_repeat(self):
+        event = create_event(
+            start_date=(2014, 5, 1),
+            end_date=(2014, 5, 4),
+            created_by=self.user,
+            title="event",
+            description="Testing 1 2 3",
+            repeat="MONTHLY",
+            end_repeat=date(2014, 5, 2),
+            utc=True
+        )
+        c = _chunk_fill_out_first_week(
+            self.year, self.month, self.counter, event, event.start_end_diff()
+        )
+        self.assertEqual(len(c), 1)
+
+    def test_repeat_reverse_out_of_range_start(self):
+        """
+        An out of range start day should not be counted, but any valid
+        days that occur after the day has been decremented, should.
+        """
+        start = 33
+        end = 30
+        end_repeat = None
+        event = create_event(
+            start_date=(2014, 5, 28),
+            end_date=(2014, 5, 28),
+            created_by=self.user,
+            title="event",
+            description="Testing 1 2 3",
+            repeat="WEEKDAY",
+        )
+        c = _repeat_reverse(
+            self.counter, self.year, self.month, start, end, end_repeat, event
+        )
+        self.assertEqual(len(c), 2)
+        self.assertEqual(c[30], [('event', event.pk)])
+        self.assertEqual(c[31], [('event', event.pk)])

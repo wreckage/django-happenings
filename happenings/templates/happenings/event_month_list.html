@@ -1,0 +1,33 @@
+{% extends 'happenings/middle.html' %}
+{% load staticfiles happenings_tags %}
+{% block content %}
+
+{% if cal_error %}
+    {{ cal_error }}
+{% endif %}
+
+{% if not show_events %}<h1>Event Calendar</h1>{% endif %}
+
+<div id="event-calendar">
+    {{ calendar|safe }}
+</div>
+
+{% if show_events %}
+<h1 id="month-list-events-title">
+    {% if cal_category and cal_tag %}
+        Events in category {{ cal_category }}
+        with tag = {{ cal_tag }}
+    {% elif cal_category %}
+        Events in {{ cal_category }}
+    {% elif cal_tag %}
+        Events with tag = {{ cal_tag }}
+    {% else %}
+        Events
+    {% endif %}
+</h1>
+
+<h3>For <span id="month-and-year">{{ month_and_year }}</span></h3>
+{% include 'happenings/partials/event_list.html' %}
+{% endif %}
+
+{% endblock content %}

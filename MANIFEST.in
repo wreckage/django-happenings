@@ -1,0 +1,6 @@
+include LICENSE
+include CHANGELOG
+include README.rst
+recursive-include happenings/static *
+recursive-include happenings/templates *
+recursive-include docs *

@@ -1,0 +1,32 @@
+{% load weekday %}
+
+<div id="event-list">
+    <ul class="calendar-list">
+    {% for day, list in events %}
+        {% for event in list %}
+            {% with colors=event.get_colors %}
+                <li class="month-event" style="background:{{ colors.0 }}; color:{{ colors.1 }};">
+                    <div class="date-widget">
+                        <div class="widget-month">
+                            {{ current.month }} 
+                        </div>
+                        <div class="widget-day">
+                            {{ day }}
+                        </div>
+                        <div class="widget-year">
+                            {% weekday current.year current.month_num day %}
+                        </div>
+                    </div>
+                    <div class="month-event-title">
+                    <a href="{{ event.get_absolute_url }}" style="color:{{ colors.1 }};">
+                        {{ event.title }}
+                    </a>
+                    </div>
+                </li>
+            {% endwith %}
+        {% endfor %}
+    {% empty %}
+    Oops.. No events!
+    {% endfor %}
+    </ul>
+</div>
