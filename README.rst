@@ -1,6 +1,6 @@
-===
+=================
 Django Happenings
-===
+=================
 
 An event calendar app for Django.
 
@@ -13,6 +13,7 @@ Features:
 * Default CSS & Javascript to help you get started
 
 Coming soon:
+
 * python3 support
 * better integration of categories and tags
 * more views, including an agenda view
@@ -36,7 +37,8 @@ Optional:
 * Twitter Bootstrap >= 3.0.0 (w/ tooltip plugin)
 * South (for database migrations)
 
-jQuery is used for AJAX and the 'Today' button on the calendar. 
+jQuery is used for AJAX and the 'Today' button on the calendar.
+
 TWBS is used to create popovers when an event is clicked on the calendar.
 
 Quick Install
@@ -46,14 +48,18 @@ Quick Install
 
    $ pip install django-happenings
 
-2. Add ``happenings`` to ``INSTALLED_APPS``::
+2. Add ``happenings`` to ``INSTALLED_APPS``:
+
+.. code-block:: python
 
   INSTALLED_APPS = (
     ...
     'happenings'
   )
 
-3. Include the ``django-happenings`` URLconf in urls.py::
+3. Include the ``django-happenings`` URLconf in urls.py:
+
+.. code-block:: python
 
   url(r'^calendar/', include('happenings.urls', namespace='calendar'))
 
@@ -63,10 +69,10 @@ Quick Install
    ``migrate happenings`` if using South). If you're running MySQL, be sure that
    your database is properly configured to use time zones.
 
-6. Run the development server and go to ``http://127.0.0.1:8000/admin/`` to
+6. Run the development server and go to ``127.0.0.1:8000/admin/`` to
     create and manage events.
 
-7. Point your browser to ``http://127.0.0.1:8000/calendar/`` to view the calendar.
+7. Check out the calendar at ``127.0.0.1:8000/calendar/``.
 
 Customizing
 -------------
@@ -153,6 +159,7 @@ Tests
 ``Tox`` is used for testing.
 
 ``$ pip install tox``
+
 ``$ tox -e py27-django16``
 
 More To Come!
