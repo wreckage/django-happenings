@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from datetime import date
 from calendar import day_name
 from django.template import Library

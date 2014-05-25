@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import datetime
 
 from django.db import models
@@ -6,12 +8,14 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
+from django.utils.encoding import python_2_unicode_compatible
 
 from .managers import EventManager
 
 auth_user_model = getattr(settings, "AUTH_USER_MODEL", "auth.User")
 
 
+@python_2_unicode_compatible
 class Event(models.Model):
 
     USER_COLORS = getattr(settings, "CALENDAR_COLORS", '')
@@ -60,7 +64,7 @@ class Event(models.Model):
     )
     tags = models.ManyToManyField('Tag', verbose_name=_('tags'), blank=True)
 
-    #--------------------------------COLORS--------------------------------#
+    # --------------------------------COLORS-------------------------------- #
     background_color = models.CharField(
         _("background color"), max_length=10, choices=COLORS, default='eeeeee'
     )
@@ -142,7 +146,7 @@ class Event(models.Model):
         else:
             return False
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def clean(self):
@@ -202,6 +206,7 @@ class Event(models.Model):
         verbose_name_plural = _('events')
 
 
+@python_2_unicode_compatible
 class Location(models.Model):
     name = models.CharField(_('Name'), max_length=255)
     address_line_1 = models.CharField(
@@ -218,22 +223,24 @@ class Location(models.Model):
         _('ZIP / Postal Code'), max_length=31, blank=True)
     country = models.CharField(_('Country'), max_length=127, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
+@python_2_unicode_compatible
 class Category(models.Model):
     title = models.CharField(_('title'), max_length=255)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     class Meta:
         verbose_name_plural = 'Categories'
 
 
+@python_2_unicode_compatible
 class Tag(models.Model):
     name = models.CharField(_('name'), max_length=255)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from datetime import date
 
 from .common import check_weekday, inc_month

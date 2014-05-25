@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from calendar import month_name
 from django.test import TestCase
 from django.core.urlresolvers import reverse

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 

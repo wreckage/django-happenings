@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from datetime import datetime, date, timedelta
 
 from django.utils.timezone import make_aware, utc

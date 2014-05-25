@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from datetime import date
 from calendar import month_name
 from itertools import chain
@@ -7,10 +9,10 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 
 from .models import Event
-from utils.displays import month_display, day_display
-from utils.next_event import get_next_event
-from utils.mixins import JSONResponseMixin
-from utils import common as c
+from happenings.utils.displays import month_display, day_display
+from happenings.utils.next_event import get_next_event
+from happenings.utils.mixins import JSONResponseMixin
+from happenings.utils import common as c
 
 
 class GenericEventView(JSONResponseMixin, ListView):

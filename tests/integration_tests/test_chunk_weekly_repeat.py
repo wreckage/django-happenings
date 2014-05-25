@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from calendar import monthrange
 import datetime
 
@@ -39,7 +41,7 @@ class WeeklyRepeatingChunkEventListViewTest(SetMeUp):
             title="Ruby",
             description="'chunk' event that lasts 5 days and repeats weekly.",
             repeat="WEEKLY",
-            end_repeat=datetime.date(2015, 04, 27)
+            end_repeat=datetime.date(2015, 4, 27)
         )
         valid_dates = {
             '2014': {

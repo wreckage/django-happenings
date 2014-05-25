@@ -1,4 +1,5 @@
 # Used to generate upcoming events
+from __future__ import unicode_literals
 
 from datetime import timedelta, date, datetime
 

@@ -1,6 +1,8 @@
 # This test file was created to fill in the untested portions of
 # utils/handlers.py. Most of the tests for handlers.py are in integration_tests
 
+from __future__ import unicode_literals
+
 from collections import defaultdict
 from datetime import date
 

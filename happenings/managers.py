@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import datetime
 from itertools import chain
 from calendar import monthrange

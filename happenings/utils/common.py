@@ -1,11 +1,13 @@
+from __future__ import unicode_literals
+
 from datetime import date, timedelta
-from collections import defaultdict
 from calendar import monthrange
 
 from django.utils import timezone
 
 
 now = timezone.localtime(timezone.now())
+
 
 def inc_month(month, year):
     """

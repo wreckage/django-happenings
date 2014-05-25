@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import datetime
 
 from happenings.models import Event
@@ -72,14 +74,14 @@ class NextEventTest(SetMeUp):
         event = Event.objects.all()
         # use date_dicts, and put the for loop into its own func (like i did
         # with check_dates)
-        #date_dicts = [
+        # date_dicts = [
         #    {datetime.date(2014, 2, 19): (2014, 2, 22)},
         #    {datetime.date(2014, 3, 13): (2014, 3, 15)},
         #    {datetime.date(2014, 4, 5): (2014, 4, 5)},
         #    {datetime.date(2015, 4, 5): (2015, 4, 5)}
-        #]
+        # ]
 
-        #for date_dict in date_dicts:
+        # for date_dict in date_dicts:
         #    for d in date_dict.items():
         #        z, x = d[0], d[1]
         #        y, m, d = get_next_event(event, z)
