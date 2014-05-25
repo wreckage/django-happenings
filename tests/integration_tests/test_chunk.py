@@ -25,7 +25,7 @@ class ChunkEventListViewTest(SetMeUp):
                 self.assertContains(response, self.cal_str(day))
 
             [self.assertNotContains(response, self.cal_str(day)) for
-             day in xrange(1, monthrange(2014, int(month))[1] + 1)
+             day in range(1, monthrange(2014, int(month))[1] + 1)
              if day not in days]
 
     def test_list_view_with_chunk_starts_and_ends_same_month(self):

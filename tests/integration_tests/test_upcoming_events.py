@@ -29,7 +29,7 @@ class UpcomingEventsTest(SetMeUp):
         fin = d + timedelta(days=2000)
         events = upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
-        for i in xrange(5):
+        for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
             self.assertEqual(events[i][1].start_date, event.start_date)
         self.assertEqual(events[0][0].date(), date(2014, 3, 31))
@@ -54,7 +54,7 @@ class UpcomingEventsTest(SetMeUp):
         fin = d + timedelta(days=4000)
         events = upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
-        for i in xrange(5):
+        for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
             self.assertEqual(events[i][1].start_date, event.start_date)
         self.assertEqual(events[0][0].date(), date(2016, 3, 1))
@@ -76,7 +76,7 @@ class UpcomingEventsTest(SetMeUp):
         fin = d + timedelta(days=4000)
         events = upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
-        for i in xrange(5):
+        for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
             self.assertEqual(events[i][1].start_date, event.start_date)
         self.assertEqual(events[0][0].date(), date(2015, 3, 1))
@@ -98,7 +98,7 @@ class UpcomingEventsTest(SetMeUp):
         fin = d + timedelta(days=4000)
         events = upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
-        for i in xrange(5):
+        for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
             self.assertEqual(events[i][1].start_date, event.start_date)
         self.assertEqual(events[0][0].date(), date(2016, 3, 1))
@@ -120,7 +120,7 @@ class UpcomingEventsTest(SetMeUp):
         fin = d + timedelta(days=4000)
         events = upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
-        for i in xrange(5):
+        for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
             self.assertEqual(events[i][1].start_date, event.start_date)
         self.assertEqual(events[0][0].date(), date(2014, 3, 1))
@@ -144,7 +144,7 @@ class UpcomingEventsTest(SetMeUp):
         fin = d + timedelta(days=4000)
         events = upcoming_events(event, d, fin)
         self.assertEqual(len(events), 3)
-        for i in xrange(1):
+        for i in range(1):
             self.assertEqual(events[i][1].title, event.title)
             self.assertEqual(events[i][1].start_date, event.start_date)
         self.assertEqual(events[0][0].date(), date(2016, 2, 29))
@@ -165,7 +165,7 @@ class UpcomingEventsTest(SetMeUp):
         fin = d + timedelta(days=365)
         events = upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
-        for i in xrange(5):
+        for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
             self.assertEqual(events[i][1].start_date, event.start_date)
         self.assertEqual(events[0][0].date(), date(2014, 7, 31))
@@ -187,7 +187,7 @@ class UpcomingEventsTest(SetMeUp):
         fin = d + timedelta(days=365)
         events = upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
-        for i in xrange(5):
+        for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
             self.assertEqual(events[i][1].start_date, event.start_date)
         self.assertEqual(events[0][0].date(), date(2015, 5, 1))
@@ -240,7 +240,7 @@ class UpcomingEventsTest(SetMeUp):
         fin = d + timedelta(days=90)
         events = upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
-        for i in xrange(5):
+        for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
             self.assertEqual(events[i][1].start_date, event.start_date)
         self.assertEqual(events[0][0].date(), date(2014, 3, 8))
@@ -278,7 +278,7 @@ class UpcomingEventsTest(SetMeUp):
         fin = d + timedelta(days=90)
         events = upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
-        for i in xrange(5):
+        for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
             self.assertEqual(events[i][1].start_date, event.start_date)
         self.assertEqual(events[0][0].date(), date(2014, 5, 10))
@@ -298,7 +298,7 @@ class UpcomingEventsTest(SetMeUp):
         fin = d + timedelta(days=90)
         events = upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
-        for i in xrange(5):
+        for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
             self.assertEqual(events[i][1].start_date, event.start_date)
         self.assertEqual(events[0][0].date(), date(2014, 5, 6))
@@ -335,7 +335,7 @@ class UpcomingEventsTest(SetMeUp):
         fin = d + timedelta(days=90)
         events = upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
-        for i in xrange(5):
+        for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
             self.assertEqual(events[i][1].start_date, event.start_date)
         self.assertEqual(events[0][0].date(), date(2014, 5, 5))
@@ -355,7 +355,7 @@ class UpcomingEventsTest(SetMeUp):
         fin = d + timedelta(days=90)
         events = upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
-        for i in xrange(5):
+        for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
             self.assertEqual(events[i][1].start_date, event.start_date)
         self.assertEqual(events[0][0].date(), date(2014, 5, 7))
@@ -394,7 +394,7 @@ class UpcomingEventsTest(SetMeUp):
         fin = d + timedelta(days=90)
         events = upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
-        for i in xrange(5):
+        for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
             self.assertEqual(events[i][1].start_date, event.start_date)
         self.assertEqual(events[0][0].date(), date(2014, 3, 10))

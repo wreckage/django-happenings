@@ -33,7 +33,7 @@ class EventListViewDisplayTest(SetMeUp):
             description="This is an event for next month."
         )
 
-        for day in xrange(15, 17):
+        for day in range(15, 17):
             response = self.client.get(reverse(
                 'calendar:day_list',
                 kwargs={'year': '2015', 'month': '2', 'day': day}
@@ -48,7 +48,7 @@ class EventListViewDisplayTest(SetMeUp):
             ))
             self.assertContains(response, "No events")
 
-        for day in xrange(20, 24):
+        for day in range(20, 24):
             response = self.client.get(reverse(
                 'calendar:day_list',
                 kwargs={'year': '2015', 'month': '2', 'day': day}
@@ -70,14 +70,14 @@ class EventListViewDisplayTest(SetMeUp):
             description="nice event",
             repeat="WEEKLY"
         )
-        for year in xrange(2014, 2015):
+        for year in range(2014, 2015):
             response = self.client.get(reverse(
                 'calendar:day_list',
                 kwargs={'year': year, 'month': '2', 'day': '28'}
             ))
             self.assertContains(response, event.title)
 
-        for year in xrange(2014, 2015):
+        for year in range(2014, 2015):
             for day in (1, 2, 3, 7, 8, 9):
                 response = self.client.get(reverse(
                     'calendar:day_list',

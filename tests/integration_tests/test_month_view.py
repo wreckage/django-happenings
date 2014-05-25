@@ -127,14 +127,14 @@ class EventListViewDisplayTest(SetMeUp):
         """Test that the calendar can start on different days."""
         # start on Monday
         cal = displays.month_display(
-            2014, 03, [], [], [], 0, 0, ''
+            2014, 3, [], [], [], 0, 0, ''
         )
         s = '</a></th></tr>\n<tr><th class="mon">Mon</th><th class="tue"'
         self.assertIn(s, cal)
 
         # start on Sunday
         cal = displays.month_display(
-            2014, 03, [], [], [], 6, 0, ''
+            2014, 3, [], [], [], 6, 0, ''
         )
         s = '</a></th></tr>\n<tr><th class="sun">Sun</th><th class="mon"'
         self.assertIn(s, cal)

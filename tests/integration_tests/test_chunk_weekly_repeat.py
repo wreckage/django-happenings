@@ -4,6 +4,7 @@ from calendar import monthrange
 import datetime
 
 from django.core.urlresolvers import reverse
+from django.utils.six.moves import xrange
 
 from .event_factory import create_event, SetMeUp
 

@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from calendar import monthrange
 
 from django.utils import timezone
+from django.utils.six.moves import xrange
 
 
 now = timezone.localtime(timezone.now())

@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 from collections import defaultdict
 from datetime import date, timedelta
 
+from django.utils.six.moves import xrange
+
 
 def _first_weekday(weekday, d):
     """

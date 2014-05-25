@@ -4,6 +4,7 @@ import datetime
 from calendar import monthrange
 
 from django.core.urlresolvers import reverse
+from django.utils.six.moves import xrange
 
 from .event_factory import create_event, SetMeUp
 
@@ -143,7 +144,7 @@ class RepeatingEventListViewTest(SetMeUp):
                 '12': [4, 18],
             },
             '2015': {
-                '01': [01, 15, 29],
+                '01': [1, 15, 29],
                 '02': [12, 26]
             }
         }
