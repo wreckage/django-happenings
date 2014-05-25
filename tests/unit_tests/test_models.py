@@ -207,25 +207,25 @@ class EventColorTest(SetMeUp):
 
 
 class ModelMethodsTest(SetMeUp):
-    def test_event_unicode(self):
+    def test_event_str(self):
         event = create_event(
             created_by=self.user,
             title="The Event",
             description="This is an event."
         )
-        self.assertEqual(event.__unicode__(), event.title)
+        self.assertEqual(event.__str__(), event.title)
 
-    def test_location_unicode(self):
+    def test_location_str(self):
         location = Location.objects.create(name="The Living End")
-        self.assertEqual(location.__unicode__(), location.name)
+        self.assertEqual(location.__str__(), location.name)
 
-    def test_category_unicode(self):
+    def test_category_str(self):
         cat = Category.objects.create(title="birthdays")
-        self.assertEqual(cat.__unicode__(), cat.title)
+        self.assertEqual(cat.__str__(), cat.title)
 
-    def test_tag_unicode(self):
+    def test_tag_str(self):
         tag = Tag.objects.create(name="birthday")
-        self.assertEqual(tag.__unicode__(), tag.name)
+        self.assertEqual(tag.__str__(), tag.name)
 
     def test_start_end_diff(self):
         """

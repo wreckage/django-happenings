@@ -21,7 +21,7 @@ class AjaxTest(TestCase):
         )
         self.assertEqual(response['Content-Type'], 'application/json')
 
-        data = loads(response.content)
+        data = loads(response.content.decode('utf8'))
         self.assertIn('<table', data['calendar'])
         self.assertIn('month_and_year', data)
 
@@ -44,7 +44,7 @@ class AjaxTest(TestCase):
         )
         self.assertEqual(response['Content-Type'], 'application/json')
 
-        data = loads(response.content)
+        data = loads(response.content.decode('utf8'))
         self.assertIn('events', data)
         self.assertIn('month', data)
 
@@ -56,7 +56,7 @@ class AjaxTest(TestCase):
         )
         self.assertEqual(response['Content-Type'], 'application/json')
 
-        data = loads(response.content)
+        data = loads(response.content.decode('utf8'))
         self.assertEqual({}, data['events'])
         self.assertIn('month', data)
         self.assertIn('<table', data['calendar'])
@@ -73,5 +73,5 @@ class AjaxTest(TestCase):
         )
         self.assertEqual(response['Content-Type'], 'application/json')
 
-        data = loads(response.content)
+        data = loads(response.content.decode('utf8'))
         self.assertEqual([], data['events'])

@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.test.utils import override_settings
 from django.utils import timezone
+from django.utils import six
 
 from .event_factory import create_event, SetMeUp
 from happenings.utils import displays
@@ -117,7 +118,7 @@ class EventListViewDisplayTest(SetMeUp):
         """
         message = "invalid"
         dates = {'2015': '00', '2015': '42', '1015': '01', '4015': '22'}
-        for year, month in dates.iteritems():
+        for year, month in six.iteritems(dates):
             response = self.client.get(reverse(
                 'calendar:list', kwargs={'year': year, 'month': month}
             ))
