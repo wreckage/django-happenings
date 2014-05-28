@@ -6,18 +6,6 @@ from datetime import date, timedelta
 from django.utils.six.moves import xrange
 
 
-def _first_weekday(weekday, d):
-    """
-    Given a weekday and a date, will increment the date until it's
-    weekday matches that of the given weekday, then that date is returned.
-    """
-    while weekday != d.weekday():
-        d += timedelta(days=1)
-    return d
-
-
-# XXX Move this to another file. Maybe put into repeater.py, and
-# change what was repeater.py to upcoming.py. Fix the tests!!
 class Repeater(object):
     def __init__(self, count, year, month, day=None, end_repeat=None,
                  event=None, num=7, count_first=False, end_on=None):
@@ -135,101 +123,199 @@ class Repeater(object):
         return self.count
 
 
-def _handle_yearly_repeat_chunk(year, month, count, event):
-    r = Repeater(
-        count, year, month, day=event.l_start_date.day,
-        end_repeat=event.end_repeat, event=event, num=1
-    )
-    if event.l_start_date.month == month:
-        if event.starts_ends_same_month():
-            r.end_on = event.l_end_date.day
-        count = r.repeat()
-    elif (event.l_end_date.month == month
-          and not event.starts_ends_same_month()):
-        count = r.repeat_reverse(event.l_end_date.day, 1)
-    return count
+class Yearly_Repeater(Repeater):
+    def _repeat_chunk(self):
+        self.day = self.event.l_start_date.day
+        self.num = 1
+        if self.event.end_repeat is not None:
+            self.end_repeat = self.event.end_repeat
+
+        if self.event.l_start_date.month == self.month:
+            if self.event.starts_ends_same_month():
+                self.end_on = self.event.l_end_date.day
+            self.count = self.repeat()
+        elif (self.event.l_end_date.month == self.month
+              and not self.event.starts_ends_same_month()):
+            self.count = self.repeat_reverse(self.event.l_end_date.day, 1)
+        return self.count
+
+    def repeat_it(self):
+        """
+        Events that repeat every year should be shown every year
+        on the same date they started e.g. an event that starts on March 23rd
+        would appear on March 23rd every year it is scheduled to repeat.
+        If the event is a chunk event, hand it over to
+        _handle_yearly_repeat_chunk().
+        """
+        # The start day will be counted if we're in the start year,
+        # so only count the day if we're in the same month as
+        # l_start_date, but not in the same year.
+        if self.event.l_start_date.month == self.month and \
+                self.event.l_start_date.year != self.year:
+            self.count_it(self.event.l_start_date.day)
+        # If we're in the same mo & yr as l_start_date,
+        # should already be filled in
+        if self.event.is_chunk() and not \
+                self.event.starts_same_year_month_as(self.year, self.month):
+            self.count = self._repeat_chunk()
+        return self.count
 
 
-def _handle_yearly_repeat(year, month, count, event):
-    """
-    Events that repeat every year should be shown every year
-    on the same date they started e.g. an event that starts on March 23rd
-    would appear on March 23rd every year it is scheduled to repeat.
-    If the event is a chunk event, hand it over to
-    _handle_yearly_repeat_chunk().
-    """
-    # The start day will be counted if we're in the start year, so only count
-    # the day if we're in the same month as l_start_date, but not in the
-    # same year.
-    if event.l_start_date.month == month and event.l_start_date.year != year:
-        count[event.l_start_date.day].append((event.title, event.pk))
-    # If we're in the same mo & yr as l_start_date, should already be filled in
-    if event.is_chunk() and not event.starts_same_year_month_as(year, month):
-        count = _handle_yearly_repeat_chunk(year, month, count, event)
-    return count
+class Monthly_Repeater(Repeater):
+    def _repeat_chunk(self):
+        start_day = self.event.l_start_date.day
+        last_day_last_mo = date(self.year, self.month, 1) - timedelta(days=1)
+
+        self.day = start_day
+        self.num = 1
+        if self.event.end_repeat is not None:
+            self.end_repeat = self.event.end_repeat
+
+        if not self.event.starts_same_year_month_as(self.year, self.month):
+            if not self.event.starts_ends_same_month():
+                    self.count = self.repeat()  # fill out the end of the month
+                    # fill out the beginning of the month, if nec.
+                    if start_day <= last_day_last_mo.day:
+                        self.count = self.repeat_reverse(
+                            self.event.l_end_date.day, 1
+                        )
+            else:
+                self.count = self.repeat_reverse(
+                    self.event.l_end_date.day, start_day + 1
+                )
+        return self.count
+
+    def repeat_it(self):
+        """
+        Events that repeat every month should be shown every month
+        on the same date they started e.g. an event that starts on the 23rd
+        would appear on the 23rd every month it is scheduled to repeat.
+        If the event is a chunk event, hand it over to
+        _handle_monthly_repeat_chunk().
+        """
+        start_day = self.event.l_start_date.day
+        if not self.event.starts_same_month_as(self.month):
+            self.count_it(start_day)
+        elif self.event.starts_same_month_not_year_as(self.month, self.year):
+            self.count_it(start_day)
+
+        if self.event.is_chunk():
+            self.count = self._repeat_chunk()
+        return self.count
 
 
-def _handle_monthly_repeat_chunk(year, month, count, event):
-    r = Repeater(
-        count, year, month, end_repeat=event.end_repeat, event=event, num=1
-    )
-    start_day = event.l_start_date.day
-    last_day_last_mo = date(year, month, 1) - timedelta(days=1)
-
-    if not event.starts_same_year_month_as(year, month):
-        if not event.starts_ends_same_month():
-                r.day = start_day
-                count = r.repeat()  # fill out the end of the month
-                # fill out the beginning of the month, if nec.
-                if start_day <= last_day_last_mo.day:
-                    count = r.repeat_reverse(event.l_end_date.day, 1)
-        else:
-            count = r.repeat_reverse(event.l_end_date.day, start_day + 1)
-    return count
-
-
-def _handle_monthly_repeat(year, month, count, event):
-    """
-    Events that repeat every month should be shown every month
-    on the same date they started e.g. an event that starts on the 23rd
-    would appear on the 23rd every month it is scheduled to repeat.
-    If the event is a chunk event, hand it over to
-    _handle_monthly_repeat_chunk().
-    """
-    start_day = event.l_start_date.day
-    if not event.starts_same_month_as(month):
-        count[start_day].append((event.title, event.pk))
-    elif event.starts_same_month_not_year_as(month, year):
-        count[start_day].append((event.title, event.pk))
-
-    if event.is_chunk():
-        count = _handle_monthly_repeat_chunk(year, month, count, event)
-    return count
-
-
-def _handle_daily_repeat(year, month, count, event):
+class Daily_Repeater(Repeater):
     """Handles repeating daily and every weekday."""
-    r = Repeater(
-        count, year, month, end_repeat=event.end_repeat, event=event
-    )
+    def repeat_it(self):
+        if self.event.end_repeat is not None:
+            self.end_repeat = self.event.end_repeat
 
-    if event.starts_same_year_month_as(year, month):
-        # we assume that l_start_date was already counted
-        r.day = event.l_start_date.day
-    else:
-        # Note count_first=True b/c although the start date isn't this month,
-        # the event does begin repeating this month and start_date has
-        # not yet been counted.
-        r.day = date(year, month, 1).day
-        r.count_first = True
+        if self.event.starts_same_year_month_as(self.year, self.month):
+            # we assume that l_start_date was already counted
+            self.day = self.event.l_start_date.day
+        else:
+            # Note count_first=True b/c although the start date isn't this
+            # month, the event does begin repeating this month and start_date
+            # has not yet been counted.
+            self.day = date(self.year, self.month, 1).day
+            self.count_first = True
 
-    if event.repeats('DAILY'):
-        r.num = 1
-        count = r.repeat()
-    else:
-        count = r.repeat_weekdays()
+        if self.event.repeats('DAILY'):
+            self.num = 1
+            self.count = self.repeat()
+        else:
+            self.count = self.repeat_weekdays()
+        return self.count
 
-    return count
+
+class Weekly_Repeater(Repeater):
+    def repeat_it(self):
+        self.count_first = True
+        if self.event.end_repeat is not None:
+            self.end_repeat = self.event.end_repeat
+
+        if self.event.starts_same_year_month_as(self.year, self.month):
+            self.count = self._handle_weekly_repeat_in()
+        else:
+            self.count = self._handle_weekly_repeat_out()
+        return self.count
+
+    def _handle_weekly_repeat_out(self):
+        """
+        Handles repeating an event weekly (or biweekly) if the current
+        year and month are outside of it's start year and month.
+        It takes care of cases 3 and 4 in _handle_weekly_repeat_in() comments.
+        """
+        start_d = _first_weekday(
+            self.event.l_start_date.weekday(), date(self.year, self.month, 1)
+        )
+        self.day = start_d.day
+        if self.event.repeats('BIWEEKLY'):
+            self.count = defaultdict(list)  # repeat_biweekly uses empty dict
+            self.num = 14
+            mycount = self.repeat_biweekly()
+            if mycount:
+                if self.event.is_chunk() and min(mycount) not in xrange(1, 8):
+                    diff = self.event.start_end_diff()
+                    mycount = _chunk_fill_out_first_week(
+                        self.year, self.month, mycount, self.event, diff
+                    )
+                self.count.update(mycount)  # update count w/ biweekly events
+
+        elif self.event.repeats('WEEKLY'):
+            # Note count_first=True b/c although the start date isn't this
+            # month, the event does begin repeating this month and start_date
+            # has not yet been counted.
+            # Also note we start from start_d.day and not
+            # event.l_start_date.day
+            self.count = self.repeat()
+            if self.event.is_chunk():
+                diff = self.event.start_end_diff()
+                self.count = _chunk_fill_out_first_week(
+                    self.year, self.month, self.count, self.event, diff
+                )
+                for i in xrange(diff):
+                    # count the chunk days, then repeat them
+                    self.day = start_d.day + i + 1
+                    self.count = self.repeat()
+        return self.count
+
+    def _handle_weekly_repeat_in(self):
+        """
+        Handles repeating both weekly and biweekly events, if the
+        current year and month are inside it's l_start_date and l_end_date.
+        Four possibilites:
+            1. The event starts this month and ends repeating this month.
+            2. The event starts this month and doesn't finish repeating
+            this month.
+            3. The event didn't start this month but ends repeating this month.
+            4. The event didn't start this month and doesn't end repeating
+            this month.
+        """
+        self.day = self.event.l_start_date.day
+        repeats = {'WEEKLY': 7, 'BIWEEKLY': 14}
+        if self.event.starts_same_year_month_as(self.year, self.month):
+            # This takes care of 1 and 2 above.
+            # Note that 'count' isn't incremented before adding a week (in
+            # Repeater.repeat()), b/c it's assumed that l_start_date
+            # was already counted.
+            for repeat, num in repeats.items():
+                self.num = num
+                if self.event.repeats(repeat):
+                    self.count = self.repeat()
+                    if self.event.is_chunk():
+                        self.repeat_chunk(diff=self.event.start_end_diff())
+        return self.count
+
+
+def _first_weekday(weekday, d):
+    """
+    Given a weekday and a date, will increment the date until it's
+    weekday matches that of the given weekday, then that date is returned.
+    """
+    while weekday != d.weekday():
+        d += timedelta(days=1)
+    return d
 
 
 def _chunk_fill_out_first_week(year, month, count, event, diff):
@@ -267,83 +353,6 @@ def _chunk_fill_out_first_week(year, month, count, event, diff):
             break
         count[day].append((event.title, event.pk))
         day += 1
-    return count
-
-
-def _handle_weekly_repeat_out(year, month, count, event):
-    """
-    Handles repeating an event weekly (or biweekly) if the current
-    year and month are outside of it's start year and month.
-    It takes care of cases 3 and 4 in _handle_weekly_repeat_in() comments.
-    """
-    start_d = _first_weekday(
-        event.l_start_date.weekday(), date(year, month, 1)
-    )
-    r = Repeater(
-        count, year, month, day=start_d.day, end_repeat=event.end_repeat,
-        event=event, count_first=True, num=7
-    )
-
-    if event.repeats('BIWEEKLY'):
-        r.count = defaultdict(list)  # repeat_biweekly works w/ an empty dict
-        r.num = 14
-        mycount = r.repeat_biweekly()
-        if mycount:
-            if event.is_chunk() and min(mycount) not in xrange(1, 8):
-                diff = event.start_end_diff()
-                mycount = _chunk_fill_out_first_week(
-                    year, month, mycount, event, diff
-                )
-            count.update(mycount)  # update count w/ biweekly events
-
-    elif event.repeats('WEEKLY'):
-        # Note count_first=True b/c although the start date isn't this month,
-        # the event does begin repeating this month and start_date has
-        # not yet been counted.
-        # Also note we start from start_d.day and not event.l_start_date.day
-        r = Repeater(
-            count, year, month, day=start_d.day, end_repeat=event.end_repeat,
-            event=event, count_first=True, num=7
-        )
-        count = r.repeat()
-        if event.is_chunk():
-            diff = event.start_end_diff()
-            count = _chunk_fill_out_first_week(year, month, count, event, diff)
-            for i in xrange(diff):
-                # count the chunk days, then repeat them
-                r.day = start_d.day + i + 1
-                count = r.repeat()
-    return count
-
-
-def _handle_weekly_repeat_in(year, month, count, event):
-    """
-    Handles repeating both weekly and biweekly events, if the
-    current year and month are inside it's l_start_date and l_end_date.
-    Four possibilites:
-        1. The event starts this month and ends repeating this month.
-        2. The event starts this month and doesn't finish repeating
-        this month.
-        3. The event didn't start this month but ends repeating this month.
-        4. The event didn't start this month and doesn't end repeating
-        this month.
-    """
-    repeats = {'WEEKLY': 7, 'BIWEEKLY': 14}
-    r = Repeater(
-        count, year, month, day=event.l_start_date.day,
-        end_repeat=event.end_repeat, event=event, count_first=True
-    )
-    if event.starts_same_year_month_as(year, month):
-        # This takes care of 1 and 2 above.
-        # Note that 'count' isn't incremented before adding a week (in
-        # Repeater.repeat()), b/c it's assumed that l_start_date was already
-        # counted.
-        for repeat, num in repeats.items():
-            r.num = num
-            if event.repeats(repeat):
-                count = r.repeat()
-                if event.is_chunk():
-                    r.repeat_chunk(diff=event.start_end_diff())
     return count
 
 
@@ -388,18 +397,15 @@ def _handle_month_events(year, month, count, month_events):
 
 def _handle_repeat_events(year, month, count, repeat_events):
     for event in repeat_events:
-        args = (year, month, count, event)
+        kwargs = {'year': year, 'month': month, 'count': count, 'event': event}
         if event.repeats('WEEKLY') or event.repeats('BIWEEKLY'):
-            if event.starts_same_year_month_as(year, month):
-                count = _handle_weekly_repeat_in(*args)
-            else:
-                count = _handle_weekly_repeat_out(*args)
+            count = Weekly_Repeater(**kwargs).repeat_it()
         elif event.repeats('MONTHLY'):
-            count = _handle_monthly_repeat(*args)
+            count = Monthly_Repeater(**kwargs).repeat_it()
         elif event.repeats('DAILY') or event.repeats('WEEKDAY'):
-            count = _handle_daily_repeat(*args)
+            count = Daily_Repeater(**kwargs).repeat_it()
         else:
-            count = _handle_yearly_repeat(*args)
+            count = Yearly_Repeater(**kwargs).repeat_it()
     return count
 
 
