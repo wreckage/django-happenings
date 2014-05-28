@@ -17,7 +17,7 @@ def _first_weekday(weekday, d):
 
 
 # XXX Move this to another file. Maybe put into repeater.py, and
-# change what was repeater.py to upcoming.py.
+# change what was repeater.py to upcoming.py. Fix the tests!!
 class Repeater(object):
     def __init__(self, count, year, month, day=None, end_repeat=None,
                  event=None, num=7, count_first=False, end_on=None):
@@ -115,18 +115,32 @@ class Repeater(object):
         return self.count
 
     def repeat_chunk(self, diff):
-        start_day = self.day
         for i in xrange(diff):
-            self.count = self.repeat(start_day + i + 1)
+            self.count = self.repeat(self.day + i + 1)
+        return self.count
+
+    def repeat_biweekly(self):
+        """
+        This function is unique b/c it expects self.count to be an
+        EMPTY defaultdict.
+        """
+        d = self.event.l_start_date
+        while d.year != self.year or d.month != self.month:
+            d += timedelta(days=14)
+        self.day = d.day
+        self.count = self.repeat()
+        if self.event.is_chunk() and self.count:
+            self.day = min(self.count)
+            self.count = self.repeat_chunk(self.event.start_end_diff())
         return self.count
 
 
 def _handle_yearly_repeat_chunk(year, month, count, event):
     r = Repeater(
-        count, year, month, end_repeat=event.end_repeat, event=event, num=1
+        count, year, month, day=event.l_start_date.day,
+        end_repeat=event.end_repeat, event=event, num=1
     )
     if event.l_start_date.month == month:
-        r.day = event.l_start_date.day
         if event.starts_ends_same_month():
             r.end_on = event.l_end_date.day
         count = r.repeat()
@@ -164,9 +178,8 @@ def _handle_monthly_repeat_chunk(year, month, count, event):
 
     if not event.starts_same_year_month_as(year, month):
         if not event.starts_ends_same_month():
-                # fill out the end of the month
                 r.day = start_day
-                count = r.repeat()
+                count = r.repeat()  # fill out the end of the month
                 # fill out the beginning of the month, if nec.
                 if start_day <= last_day_last_mo.day:
                     count = r.repeat_reverse(event.l_end_date.day, 1)
@@ -257,29 +270,6 @@ def _chunk_fill_out_first_week(year, month, count, event, diff):
     return count
 
 
-# XXX This should be moved into Repeater(). Will also need to fix
-# handle_weekly_repeat_out() (below)
-def _repeat_biweekly(year, month, event):
-    """
-    This function is unique b/c it doesn't accept a defaultdict, but rather
-    creates a fresh one, adds in any days, then returns that.
-    """
-    mycount = defaultdict(list)
-    r = Repeater(
-        mycount, year, month, end_repeat=event.end_repeat, event=event,
-        count_first=True, num=14
-    )
-    d = event.l_start_date
-    while d.year != year or d.month != month:
-        d += timedelta(days=14)
-    r.day = d.day
-    mycount = r.repeat()
-    if event.is_chunk() and mycount:
-        r.day = min(mycount)
-        mycount = r.repeat_chunk(event.start_end_diff())
-    return mycount
-
-
 def _handle_weekly_repeat_out(year, month, count, event):
     """
     Handles repeating an event weekly (or biweekly) if the current
@@ -289,15 +279,22 @@ def _handle_weekly_repeat_out(year, month, count, event):
     start_d = _first_weekday(
         event.l_start_date.weekday(), date(year, month, 1)
     )
+    r = Repeater(
+        count, year, month, day=start_d.day, end_repeat=event.end_repeat,
+        event=event, count_first=True, num=7
+    )
+
     if event.repeats('BIWEEKLY'):
-        mycount = _repeat_biweekly(year, month, event)
+        r.count = defaultdict(list)  # repeat_biweekly works w/ an empty dict
+        r.num = 14
+        mycount = r.repeat_biweekly()
         if mycount:
             if event.is_chunk() and min(mycount) not in xrange(1, 8):
                 diff = event.start_end_diff()
                 mycount = _chunk_fill_out_first_week(
                     year, month, mycount, event, diff
                 )
-            count.update(mycount)
+            count.update(mycount)  # update count w/ biweekly events
 
     elif event.repeats('WEEKLY'):
         # Note count_first=True b/c although the start date isn't this month,
