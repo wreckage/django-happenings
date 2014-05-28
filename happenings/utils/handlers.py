@@ -16,120 +16,123 @@ def _first_weekday(weekday, d):
     return d
 
 
-def _repeat(count, year, month, day, end_repeat, event, num=7,
-            count_first=False, end_on=None):
-    """
-    Add 'num' to the day and count that day until we reach end_repeat, or
-    until we're outside of the current month, counting the days as we go along.
-    Then return the count.
-    """
-    try:
-        d = date(year, month, day)
-    except ValueError:  # out of range day
-        return count
+# XXX Move this to another file. Maybe put into repeater.py, and
+# change what was repeater.py to upcoming.py.
+class Repeater(object):
+    def __init__(self, count, year, month, day=None, end_repeat=None,
+                 event=None, num=7, count_first=False, end_on=None):
+        self.count = count
+        self.year = year
+        self.month = month
+        self.day = day
+        self.end_repeat = end_repeat
+        self.event = event
+        self.num = num
+        self.count_first = count_first
+        self.end_on = end_on
+        if end_repeat is None:  # set to far off date to simulate 'forever'
+            self.end_repeat = date(2200, 3, 3)
 
-    if end_repeat is None:  # set to far off date to simulate 'forever'
-        end_repeat = date(2200, 3, 3)
+    def count_it(self, day):
+        self.count[day].append((self.event.title, self.event.pk))
 
-    if count_first and d <= end_repeat:
-        count[d.day].append((event.title, event.pk))
+    def repeat(self, day=None):
+        """
+        Add 'num' to the day and count that day until we reach end_repeat, or
+        until we're outside of the current month, counting the days
+        as we go along. Then return the count.
+        """
+        if day is None:
+            day = self.day
 
-    d += timedelta(days=num)
-
-    if end_on is not None:
-        while d.month == month and d <= end_repeat and d.day <= end_on:
-            count[d.day].append((event.title, event.pk))
-            d += timedelta(days=num)
-    else:
-        while d.month == month and d <= end_repeat:
-            count[d.day].append((event.title, event.pk))
-            d += timedelta(days=num)
-    return count
-
-
-def _repeat_weekdays(count, year, month, day, end_repeat, event,
-                     count_first=False):
-    """
-    Like _repeat(), but used to repeat every weekday.
-    """
-    try:
-        d = date(year, month, day)
-    except ValueError:  # out of range day
-        return count
-
-    if end_repeat is None:
-        end_repeat = date(2200, 3, 3)
-
-    if count_first and d <= end_repeat and d.weekday() not in (5, 6):
-        count[d.day].append((event.title, event.pk))
-
-    d += timedelta(days=1)
-
-    while d.month == month and d <= end_repeat:
-        if d.weekday() not in (5, 6):
-            count[d.day].append((event.title, event.pk))
-        d += timedelta(days=1)
-    return count
-
-
-def _repeat_reverse(count, year, month, start, end, end_repeat, event):
-    """
-    Starts from 'start' day and counts backwards until 'end' day.
-    'start' should be >= 'end'. If it's equal to, does nothing.
-    If a day falls outside of end_repeat, it won't be counted.
-    """
-    if end_repeat is None:
-        end_repeat = date(2200, 3, 3)
-    day = start
-    diff = start - end
-    try:
-        if date(year, month, day) <= end_repeat:
-            count[day].append((event.title, event.pk))
-    # a value error likely means the event runs past the end of the month,
-    # like an event that ends on the 31st, but the month doesn't have that
-    # many days. Ignore it b/c the dates won't be added to calendar anyway
-    except ValueError:
-        pass
-    for i in xrange(diff):
-        day -= 1
         try:
-            if date(year, month, day) <= end_repeat:
-                count[day].append((event.title, event.pk))
+            d = date(self.year, self.month, day)
+        except ValueError:  # out of range day
+            return self.count
+
+        if self.count_first and d <= self.end_repeat:
+            self.count_it(d.day)
+
+        d += timedelta(days=self.num)
+
+        if self.end_on is not None:
+            while d.month == self.month and \
+                    d <= self.end_repeat and \
+                    d.day <= self.end_on:
+                self.count_it(d.day)
+                d += timedelta(days=self.num)
+        else:
+            while d.month == self.month and d <= self.end_repeat:
+                self.count_it(d.day)
+                d += timedelta(days=self.num)
+        return self.count
+
+    def repeat_weekdays(self):
+        """
+        Like self.repeat(), but used to repeat every weekday.
+        """
+        try:
+            d = date(self.year, self.month, self.day)
+        except ValueError:  # out of range day
+            return self.count
+
+        if self.count_first and \
+                d <= self.end_repeat and \
+                d.weekday() not in (5, 6):
+            self.count_it(d.day)
+
+        d += timedelta(days=1)
+
+        while d.month == self.month and d <= self.end_repeat:
+            if d.weekday() not in (5, 6):
+                self.count_it(d.day)
+            d += timedelta(days=1)
+        return self.count
+
+    def repeat_reverse(self, start, end):
+        """
+        Starts from 'start' day and counts backwards until 'end' day.
+        'start' should be >= 'end'. If it's equal to, does nothing.
+        If a day falls outside of end_repeat, it won't be counted.
+        """
+        day = start
+        diff = start - end
+        try:
+            if date(self.year, self.month, day) <= self.end_repeat:
+                self.count_it(day)
+        # a value error likely means the event runs past the end of the month,
+        # like an event that ends on the 31st, but the month doesn't have that
+        # many days. Ignore it b/c the dates won't be added to calendar anyway
         except ValueError:
             pass
-    return count
+        for i in xrange(diff):
+            day -= 1
+            try:
+                if date(self.year, self.month, day) <= self.end_repeat:
+                    self.count_it(day)
+            except ValueError:
+                pass
+        return self.count
 
-
-def _repeat_chunk(count, year, month, start_day, end_repeat,
-                  diff, num, event, count_first=False):
-    for i in xrange(diff):
-        count = _repeat(
-            count, year, month,
-            (start_day + i + 1),
-            end_repeat, event, num=num, count_first=count_first
-        )
-    return count
+    def repeat_chunk(self, diff):
+        start_day = self.day
+        for i in xrange(diff):
+            self.count = self.repeat(start_day + i + 1)
+        return self.count
 
 
 def _handle_yearly_repeat_chunk(year, month, count, event):
-    start_day = event.l_start_date.day
+    r = Repeater(
+        count, year, month, end_repeat=event.end_repeat, event=event, num=1
+    )
     if event.l_start_date.month == month:
+        r.day = event.l_start_date.day
         if event.starts_ends_same_month():
-            count = _repeat(
-                count, year, month, start_day, event.end_repeat, event,
-                num=1, end_on=event.l_end_date.day
-            )
-        else:
-            count = _repeat(
-                count, year, month, start_day,
-                event.end_repeat, event, num=1
-            )
+            r.end_on = event.l_end_date.day
+        count = r.repeat()
     elif (event.l_end_date.month == month
           and not event.starts_ends_same_month()):
-        count = _repeat_reverse(
-            count, year, month,
-            event.l_end_date.day, 1, event.end_repeat, event
-        )
+        count = r.repeat_reverse(event.l_end_date.day, 1)
     return count
 
 
@@ -153,27 +156,22 @@ def _handle_yearly_repeat(year, month, count, event):
 
 
 def _handle_monthly_repeat_chunk(year, month, count, event):
+    r = Repeater(
+        count, year, month, end_repeat=event.end_repeat, event=event, num=1
+    )
     start_day = event.l_start_date.day
     last_day_last_mo = date(year, month, 1) - timedelta(days=1)
 
     if not event.starts_same_year_month_as(year, month):
         if not event.starts_ends_same_month():
                 # fill out the end of the month
-                count = _repeat(
-                    count, year, month, start_day,
-                    event.end_repeat, event, num=1
-                )
+                r.day = start_day
+                count = r.repeat()
                 # fill out the beginning of the month, if nec.
                 if start_day <= last_day_last_mo.day:
-                    count = _repeat_reverse(
-                        count, year, month,
-                        event.l_end_date.day, 1, event.end_repeat, event
-                    )
+                    count = r.repeat_reverse(event.l_end_date.day, 1)
         else:
-            count = _repeat_reverse(
-                count, year, month, event.l_end_date.day, start_day + 1,
-                event.end_repeat, event
-            )
+            count = r.repeat_reverse(event.l_end_date.day, start_day + 1)
     return count
 
 
@@ -198,34 +196,26 @@ def _handle_monthly_repeat(year, month, count, event):
 
 def _handle_daily_repeat(year, month, count, event):
     """Handles repeating daily and every weekday."""
+    r = Repeater(
+        count, year, month, end_repeat=event.end_repeat, event=event
+    )
+
     if event.starts_same_year_month_as(year, month):
         # we assume that l_start_date was already counted
-        if event.repeats('DAILY'):
-            count = _repeat(
-                count, year, month,
-                event.l_start_date.day, event.end_repeat, event, num=1
-            )
-        else:
-            count = _repeat_weekdays(
-                count, year, month,
-                event.l_start_date.day, event.end_repeat, event
-            )
+        r.day = event.l_start_date.day
     else:
-        start_d = date(year, month, 1)
         # Note count_first=True b/c although the start date isn't this month,
         # the event does begin repeating this month and start_date has
         # not yet been counted.
-        # Also note we start from start_d.day and not event.l_start_date.day
-        if event.repeats('DAILY'):
-            count = _repeat(
-                count, year, month,
-                start_d.day, event.end_repeat, event, num=1, count_first=True
-            )
-        else:
-            count = _repeat_weekdays(
-                count, year, month,
-                start_d.day, event.end_repeat, event, count_first=True
-            )
+        r.day = date(year, month, 1).day
+        r.count_first = True
+
+    if event.repeats('DAILY'):
+        r.num = 1
+        count = r.repeat()
+    else:
+        count = r.repeat_weekdays()
+
     return count
 
 
@@ -267,24 +257,26 @@ def _chunk_fill_out_first_week(year, month, count, event, diff):
     return count
 
 
+# XXX This should be moved into Repeater(). Will also need to fix
+# handle_weekly_repeat_out() (below)
 def _repeat_biweekly(year, month, event):
     """
     This function is unique b/c it doesn't accept a defaultdict, but rather
     creates a fresh one, adds in any days, then returns that.
     """
     mycount = defaultdict(list)
+    r = Repeater(
+        mycount, year, month, end_repeat=event.end_repeat, event=event,
+        count_first=True, num=14
+    )
     d = event.l_start_date
-    num = 14
     while d.year != year or d.month != month:
         d += timedelta(days=14)
-    mycount = _repeat(
-        mycount, year, month, d.day, event.end_repeat, event,
-        num=num, count_first=True
-    )
+    r.day = d.day
+    mycount = r.repeat()
     if event.is_chunk() and mycount:
-        mycount = _repeat_chunk(
-            mycount, year, month, min(mycount), event.end_repeat,
-            event.start_end_diff(), num, event, count_first=True)
+        r.day = min(mycount)
+        mycount = r.repeat_chunk(event.start_end_diff())
     return mycount
 
 
@@ -312,20 +304,18 @@ def _handle_weekly_repeat_out(year, month, count, event):
         # the event does begin repeating this month and start_date has
         # not yet been counted.
         # Also note we start from start_d.day and not event.l_start_date.day
-        count = _repeat(
-            count, year, month,
-            start_d.day, event.end_repeat, event, num=7, count_first=True
+        r = Repeater(
+            count, year, month, day=start_d.day, end_repeat=event.end_repeat,
+            event=event, count_first=True, num=7
         )
+        count = r.repeat()
         if event.is_chunk():
             diff = event.start_end_diff()
             count = _chunk_fill_out_first_week(year, month, count, event, diff)
             for i in xrange(diff):
                 # count the chunk days, then repeat them
-                count = _repeat(
-                    count, year, month,
-                    (start_d.day + i + 1),
-                    event.end_repeat, event, num=7, count_first=True
-                )
+                r.day = start_d.day + i + 1
+                count = r.repeat()
     return count
 
 
@@ -341,25 +331,22 @@ def _handle_weekly_repeat_in(year, month, count, event):
         4. The event didn't start this month and doesn't end repeating
         this month.
     """
-    start_day = event.l_start_date.day
-    end_r = event.end_repeat
     repeats = {'WEEKLY': 7, 'BIWEEKLY': 14}
+    r = Repeater(
+        count, year, month, day=event.l_start_date.day,
+        end_repeat=event.end_repeat, event=event, count_first=True
+    )
     if event.starts_same_year_month_as(year, month):
         # This takes care of 1 and 2 above.
         # Note that 'count' isn't incremented before adding a week (in
-        # _repeat), b/c it's assumed that l_start_date was already
+        # Repeater.repeat()), b/c it's assumed that l_start_date was already
         # counted.
         for repeat, num in repeats.items():
+            r.num = num
             if event.repeats(repeat):
-                count = _repeat(
-                    count, year, month,
-                    event.l_start_date.day, event.end_repeat, event, num=num
-                )
+                count = r.repeat()
                 if event.is_chunk():
-                    diff = event.start_end_diff()
-                    count = _repeat_chunk(
-                        count, year, month, start_day, end_r, diff, num, event
-                    )
+                    r.repeat_chunk(diff=event.start_end_diff())
     return count
 
 
@@ -371,29 +358,22 @@ def _handle_single_chunk(year, month, count, event):
     if not event.starts_same_month_as(month) and not event.repeats('NEVER'):
         # we don't want repeating chunk events if we're not in it's start month
         return count
-    start = event.l_start_date.day
-    end = event.l_end_date.day
+
+    r = Repeater(
+        count, year, month, day=event.l_start_date.day,
+        end_repeat=event.end_repeat, event=event, count_first=True,
+        end_on=event.l_end_date.day, num=1
+    )
+
     if event.starts_same_month_as(month):
-        if event.ends_same_month_as(month):
-            # The chunk event starts and ends this month
-            count = _repeat(
-                count, year, month, start, event.end_repeat,
-                event, num=1, count_first=True, end_on=end
-            )
-        else:
+        if not event.ends_same_month_as(month):
             # The chunk event starts this month, but does NOT end this month
-            count = _repeat(
-                count, year, month, start, event.end_repeat,
-                event, num=1, count_first=True
-            )
+            r.end_on = None
     else:
         # event chunks can be maximum of 7 days, so if an event chunk
         # didn't start this month, we know it will end this month.
-        start = 1
-        count = _repeat(
-            count, year, month, start, event.end_repeat,
-            event, num=1, count_first=True, end_on=end
-        )
+        r.day = 1
+    count = r.repeat()
     return count
 
 
