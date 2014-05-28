@@ -1,3 +1,11 @@
+Version 0.1.1 (May 27, 2014)
+----------------------------
+
+  * Added Python 3 support
+  * Added Travis CI and Coveralls.
+
+
+
 Version 0.1 (May 20, 2014)
 ----------------------------
 

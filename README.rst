@@ -2,7 +2,7 @@
 Django Happenings
 =================
 
-|travis| |coverage|
+|travis| |coverage| |version|
 
 An event calendar app for Django.
 
@@ -16,7 +16,6 @@ Features:
 
 Coming soon:
 
-* python3 support
 * better integration of categories and tags
 * more views, including an agenda view
 * support for users
@@ -29,14 +28,14 @@ Dependencies
 
 Required:
 
-* Django >= 1.6
-* Python >= 2.6 < 3 (Python 3 support coming soon)
+* Django 1.6+
+* Python 2.6+, 3+
 * pytz
 
 Optional:
 
 * jQuery
-* Twitter Bootstrap >= 3.0.0 (w/ tooltip plugin)
+* Twitter Bootstrap 3.0.0+ (w/ tooltip plugin)
 * South (for database migrations)
 
 jQuery is used for AJAX and the 'Today' button on the calendar.
@@ -71,8 +70,7 @@ Quick Install
    ``migrate happenings`` if using South). If you're running MySQL, be sure that
    your database is properly configured to use time zones.
 
-6. Run the development server and go to ``127.0.0.1:8000/admin/`` to
-create and manage events.
+6. Run the development server and go to ``127.0.0.1:8000/admin/`` to create and manage events.
 
 7. Check out the calendar at ``127.0.0.1:8000/calendar/``.
 
@@ -173,3 +171,6 @@ More To Come!
 .. |coverage| image:: https://coveralls.io/repos/wreckage/django-happenings/badge.png?branch=master
    :alt: Coverage Status
    :target: https://coveralls.io/r/wreckage/django-happenings?branch=master
+.. |version| image:: https://badge.fury.io/py/django-happenings.svg
+   :alt: Pypi Version
+   :target: https://badge.fury.io/py/django-happenings
