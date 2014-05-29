@@ -53,7 +53,6 @@ class Repeater(object):
             while d.month == self.month and d <= self.end_repeat:
                 self.count_it(d.day)
                 d += timedelta(days=self.num)
-        return self.count
 
     def repeat_weekdays(self):
         """
@@ -75,7 +74,6 @@ class Repeater(object):
             if d.weekday() not in (5, 6):
                 self.count_it(d.day)
             d += timedelta(days=1)
-        return self.count
 
     def repeat_reverse(self, start, end):
         """
@@ -100,27 +98,31 @@ class Repeater(object):
                     self.count_it(day)
             except ValueError:
                 pass
-        return self.count
 
     def repeat_chunk(self, diff):
         for i in xrange(diff):
-            self.count = self.repeat(self.day + i + 1)
-        return self.count
+            self.repeat(self.day + i + 1)
 
     def repeat_biweekly(self):
         """
-        This function is unique b/c it expects self.count to be an
-        EMPTY defaultdict.
+        This function is unique b/c it creates an empty defaultdict,
+        adds in the event occurrences by creating an instance of Repeater,
+        then returns the defaultdict, likely to be merged into the 'main'
+        defaultdict (the one holding all event occurrences for this month).
         """
+        mycount = defaultdict(list)
         d = self.event.l_start_date
         while d.year != self.year or d.month != self.month:
             d += timedelta(days=14)
-        self.day = d.day
-        self.count = self.repeat()
-        if self.event.is_chunk() and self.count:
-            self.day = min(self.count)
-            self.count = self.repeat_chunk(self.event.start_end_diff())
-        return self.count
+        r = self.__class__(
+            mycount, self.year, self.month, d.day, self.event.end_repeat,
+            self.event, num=self.num, count_first=True
+        )
+        r.repeat()
+        if self.event.is_chunk() and r.count:
+            r.day = min(r.count)
+            r.repeat_chunk(self.event.start_end_diff())
+        return r.count
 
 
 class Yearly_Repeater(Repeater):
@@ -133,11 +135,10 @@ class Yearly_Repeater(Repeater):
         if self.event.l_start_date.month == self.month:
             if self.event.starts_ends_same_month():
                 self.end_on = self.event.l_end_date.day
-            self.count = self.repeat()
+            self.repeat()
         elif (self.event.l_end_date.month == self.month
               and not self.event.starts_ends_same_month()):
-            self.count = self.repeat_reverse(self.event.l_end_date.day, 1)
-        return self.count
+            self.repeat_reverse(self.event.l_end_date.day, 1)
 
     def repeat_it(self):
         """
@@ -157,7 +158,7 @@ class Yearly_Repeater(Repeater):
         # should already be filled in
         if self.event.is_chunk() and not \
                 self.event.starts_same_year_month_as(self.year, self.month):
-            self.count = self._repeat_chunk()
+            self._repeat_chunk()
         return self.count
 
 
@@ -173,17 +174,16 @@ class Monthly_Repeater(Repeater):
 
         if not self.event.starts_same_year_month_as(self.year, self.month):
             if not self.event.starts_ends_same_month():
-                    self.count = self.repeat()  # fill out the end of the month
+                    self.repeat()  # fill out the end of the month
                     # fill out the beginning of the month, if nec.
                     if start_day <= last_day_last_mo.day:
-                        self.count = self.repeat_reverse(
+                        self.repeat_reverse(
                             self.event.l_end_date.day, 1
                         )
             else:
-                self.count = self.repeat_reverse(
+                self.repeat_reverse(
                     self.event.l_end_date.day, start_day + 1
                 )
-        return self.count
 
     def repeat_it(self):
         """
@@ -200,7 +200,7 @@ class Monthly_Repeater(Repeater):
             self.count_it(start_day)
 
         if self.event.is_chunk():
-            self.count = self._repeat_chunk()
+            self._repeat_chunk()
         return self.count
 
 
@@ -223,22 +223,26 @@ class Daily_Repeater(Repeater):
 
         if self.event.repeats('DAILY'):
             self.num = 1
-            self.count = self.repeat()
+            self.repeat()
         else:
-            self.count = self.repeat_weekdays()
+            self.repeat_weekdays()
         return self.count
 
 
 class Weekly_Repeater(Repeater):
-    def repeat_it(self):
-        if self.event.end_repeat is not None:
-            self.end_repeat = self.event.end_repeat
-
-        if self.event.starts_same_year_month_as(self.year, self.month):
-            self.count = self._handle_weekly_repeat_in()
-        else:
-            self.count = self._handle_weekly_repeat_out()
-        return self.count
+    def _biweekly_helper(self):
+        """Created to take some of the load off of _handle_weekly_repeat_out"""
+        self.num = 14
+        mycount = self.repeat_biweekly()
+        if mycount:
+            if self.event.is_chunk() and min(mycount) not in xrange(1, 8):
+                mycount = _chunk_fill_out_first_week(
+                    self.year, self.month, mycount, self.event,
+                    diff=self.event.start_end_diff()
+                )
+            for k, v in mycount.items():
+                for item in v:
+                    self.count[k].append(item)
 
     def _handle_weekly_repeat_out(self):
         """
@@ -252,24 +256,14 @@ class Weekly_Repeater(Repeater):
         self.day = start_d.day
         self.count_first = True
         if self.event.repeats('BIWEEKLY'):
-            self.count = defaultdict(list)  # repeat_biweekly uses empty dict
-            self.num = 14
-            mycount = self.repeat_biweekly()
-            if mycount:
-                if self.event.is_chunk() and min(mycount) not in xrange(1, 8):
-                    diff = self.event.start_end_diff()
-                    mycount = _chunk_fill_out_first_week(
-                        self.year, self.month, mycount, self.event, diff
-                    )
-                self.count.update(mycount)  # update count w/ biweekly events
-
+            self._biweekly_helper()
         elif self.event.repeats('WEEKLY'):
             # Note count_first=True b/c although the start date isn't this
             # month, the event does begin repeating this month and start_date
             # has not yet been counted.
             # Also note we start from start_d.day and not
             # event.l_start_date.day
-            self.count = self.repeat()
+            self.repeat()
             if self.event.is_chunk():
                 diff = self.event.start_end_diff()
                 self.count = _chunk_fill_out_first_week(
@@ -278,8 +272,7 @@ class Weekly_Repeater(Repeater):
                 for i in xrange(diff):
                     # count the chunk days, then repeat them
                     self.day = start_d.day + i + 1
-                    self.count = self.repeat()
-        return self.count
+                    self.repeat()
 
     def _handle_weekly_repeat_in(self):
         """
@@ -304,9 +297,18 @@ class Weekly_Repeater(Repeater):
             for repeat, num in repeats.items():
                 self.num = num
                 if self.event.repeats(repeat):
-                    self.count = self.repeat()
+                    self.repeat()
                     if self.event.is_chunk():
                         self.repeat_chunk(diff=self.event.start_end_diff())
+
+    def repeat_it(self):
+        if self.event.end_repeat is not None:
+            self.end_repeat = self.event.end_repeat
+
+        if self.event.starts_same_year_month_as(self.year, self.month):
+            self._handle_weekly_repeat_in()
+        else:
+            self._handle_weekly_repeat_out()
         return self.count
 
 
@@ -381,7 +383,8 @@ def _handle_single_chunk(year, month, count, event):
         # event chunks can be maximum of 7 days, so if an event chunk
         # didn't start this month, we know it will end this month.
         r.day = 1
-    count = r.repeat()
+    r.repeat()
+    count = r.count
     return count
 
 
