@@ -90,7 +90,8 @@ class TestHandlers(SetMeUp):
         c = h.Repeater(
             self.counter, self.year, self.month,
             end_repeat=end_repeat, event=event
-        ).repeat_reverse(start, end)
-        self.assertEqual(len(c), 2)
-        self.assertEqual(c[30], [('event', event.pk)])
-        self.assertEqual(c[31], [('event', event.pk)])
+        )
+        c.repeat_reverse(start, end)
+        self.assertEqual(len(c.count), 2)
+        self.assertEqual(c.count[30], [('event', event.pk)])
+        self.assertEqual(c.count[31], [('event', event.pk)])
