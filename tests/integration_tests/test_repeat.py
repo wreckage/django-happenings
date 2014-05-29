@@ -117,10 +117,8 @@ class RepeatingEventListViewTest(SetMeUp):
             description="Single event",
             repeat="WEEKLY",
         )
-        response = self.client.get(reverse(
-            'calendar:list'
-        ))
-        match = re.findall('May 26, 12:00AM - 12:00AM', str(response))
+        response = self.client.get(reverse('calendar:list'))
+        match = re.findall('May 26, 12:00AM - 12:00AM', str(response.content))
         self.assertEqual(1, len(match))
 
     def test_list_view_with_never_ending_weekly_repeat(self):
