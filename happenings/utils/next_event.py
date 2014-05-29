@@ -48,8 +48,8 @@ def get_next_event(event, now):
             month = now.month
             while not future_dates:
                 month, year = inc_month(month, year)
-                occurrences = handle_count(year, month, event, []) or \
-                    handle_count(year, month, [], event)
+                occurrences = handle_count(year, month, [], event) or \
+                    handle_count(year, month, event, [])
                 # we don't check for now.day here, b/c we're in a month past
                 # whatever now is. As an example, if we checked for now.day
                 # we'd get stuck in an infinite loop if this were a

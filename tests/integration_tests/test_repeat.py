@@ -105,7 +105,7 @@ class RepeatingEventListViewTest(SetMeUp):
     def test_weekly_repeating_event_only_appears_once(self):
         """
         Tests that a weekly repeating event only appears once.
-        This test written after a bug was discovered on May 28, 2014.
+        This test written after a bug was discovered on May 29, 2014.
         The bug was created during the switch to a more OO design, and involved
         count_first being incorrectly set to True.
         """
