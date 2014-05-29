@@ -6,11 +6,7 @@ from __future__ import unicode_literals
 from collections import defaultdict
 from datetime import date
 
-from happenings.utils.handlers import (
-    _repeat_weekdays,
-    _repeat_reverse,
-    _chunk_fill_out_first_week
-)
+from happenings.utils import handlers as h
 from tests.integration_tests.event_factory import create_event, SetMeUp
 
 
@@ -33,9 +29,9 @@ class TestHandlers(SetMeUp):
             description="Testing 1 2 3",
             repeat="WEEKDAY",
         )
-        c = _repeat_weekdays(
+        c = h.Repeater(
             self.counter, self.year, self.month, day, end_repeat, event
-        )
+        ).repeat()
         self.assertEqual(len(c), 0)
 
     def test_repeat_weekdays_count_first_day(self):
@@ -50,10 +46,10 @@ class TestHandlers(SetMeUp):
             description="Testing 1 2 3",
             repeat="WEEKDAY",
         )
-        c = _repeat_weekdays(
+        c = h.Daily_Repeater(
             self.counter, self.year, self.month, day, end_repeat, event,
             count_first=True
-        )
+        ).repeat_it()
         self.assertEqual(len(c), 3)
         self.assertEqual(c[28], [('event', event.pk)])
         self.assertEqual(c[29], [('event', event.pk)])
@@ -70,7 +66,7 @@ class TestHandlers(SetMeUp):
             end_repeat=date(2014, 5, 2),
             utc=True
         )
-        c = _chunk_fill_out_first_week(
+        c = h._chunk_fill_out_first_week(
             self.year, self.month, self.counter, event, event.start_end_diff()
         )
         self.assertEqual(len(c), 1)
@@ -91,9 +87,10 @@ class TestHandlers(SetMeUp):
             description="Testing 1 2 3",
             repeat="WEEKDAY",
         )
-        c = _repeat_reverse(
-            self.counter, self.year, self.month, start, end, end_repeat, event
-        )
+        c = h.Repeater(
+            self.counter, self.year, self.month,
+            end_repeat=end_repeat, event=event
+        ).repeat_reverse(start, end)
         self.assertEqual(len(c), 2)
         self.assertEqual(c[30], [('event', event.pk)])
         self.assertEqual(c[31], [('event', event.pk)])

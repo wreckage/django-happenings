@@ -211,7 +211,8 @@ class Daily_Repeater(Repeater):
             self.end_repeat = self.event.end_repeat
 
         if self.event.starts_same_year_month_as(self.year, self.month):
-            # we assume that l_start_date was already counted
+            # we assume that l_start_date was already counted, so no
+            # count_first=True
             self.day = self.event.l_start_date.day
         else:
             # Note count_first=True b/c although the start date isn't this
