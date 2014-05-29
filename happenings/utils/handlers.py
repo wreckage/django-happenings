@@ -230,7 +230,6 @@ class Daily_Repeater(Repeater):
 
 class Weekly_Repeater(Repeater):
     def repeat_it(self):
-        self.count_first = True
         if self.event.end_repeat is not None:
             self.end_repeat = self.event.end_repeat
 
@@ -250,6 +249,7 @@ class Weekly_Repeater(Repeater):
             self.event.l_start_date.weekday(), date(self.year, self.month, 1)
         )
         self.day = start_d.day
+        self.count_first = True
         if self.event.repeats('BIWEEKLY'):
             self.count = defaultdict(list)  # repeat_biweekly uses empty dict
             self.num = 14
@@ -293,6 +293,7 @@ class Weekly_Repeater(Repeater):
             this month.
         """
         self.day = self.event.l_start_date.day
+        self.count_first = False
         repeats = {'WEEKLY': 7, 'BIWEEKLY': 14}
         if self.event.starts_same_year_month_as(self.year, self.month):
             # This takes care of 1 and 2 above.

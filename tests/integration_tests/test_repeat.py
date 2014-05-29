@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import re
 import datetime
 from calendar import monthrange
 
@@ -100,6 +101,27 @@ class RepeatingEventListViewTest(SetMeUp):
             repeat=repeat,
         )
         return event
+
+    def test_weekly_repeating_event_only_appears_once(self):
+        """
+        Tests that a weekly repeating event only appears once.
+        This test written after a bug was discovered on May 28, 2014.
+        The bug was created during the switch to a more OO design, and involved
+        count_first being incorrectly set to True.
+        """
+        create_event(
+            start_date=(2014, 5, 26),
+            end_date=(2014, 5, 26),
+            created_by=self.user,
+            title="Whoa",
+            description="Single event",
+            repeat="WEEKLY",
+        )
+        response = self.client.get(reverse(
+            'calendar:list'
+        ))
+        match = re.findall('May 26, 12:00AM - 12:00AM', str(response))
+        self.assertEqual(1, len(match))
 
     def test_list_view_with_never_ending_weekly_repeat(self):
         event = self.create_event_repeat_forever('WEEKLY')
