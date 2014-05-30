@@ -28,7 +28,7 @@ class Repeater(object):
         """
         Add 'num' to the day and count that day until we reach end_repeat, or
         until we're outside of the current month, counting the days
-        as we go along. Then return the count.
+        as we go along.
         """
         if day is None:
             day = self.day
@@ -145,8 +145,7 @@ class Yearly_Repeater(Repeater):
         Events that repeat every year should be shown every year
         on the same date they started e.g. an event that starts on March 23rd
         would appear on March 23rd every year it is scheduled to repeat.
-        If the event is a chunk event, hand it over to
-        _handle_yearly_repeat_chunk().
+        If the event is a chunk event, hand it over to _repeat_chunk().
         """
         # The start day will be counted if we're in the start year,
         # so only count the day if we're in the same month as
@@ -190,8 +189,6 @@ class Monthly_Repeater(Repeater):
         Events that repeat every month should be shown every month
         on the same date they started e.g. an event that starts on the 23rd
         would appear on the 23rd every month it is scheduled to repeat.
-        If the event is a chunk event, hand it over to
-        _handle_monthly_repeat_chunk().
         """
         start_day = self.event.l_start_date.day
         if not self.event.starts_same_month_as(self.month):
@@ -247,7 +244,7 @@ class Weekly_Repeater(Repeater):
     def _handle_weekly_repeat_out(self):
         """
         Handles repeating an event weekly (or biweekly) if the current
-        year and month are outside of it's start year and month.
+        year and month are outside of its start year and month.
         It takes care of cases 3 and 4 in _handle_weekly_repeat_in() comments.
         """
         start_d = _first_weekday(
@@ -384,8 +381,7 @@ def _handle_single_chunk(year, month, count, event):
         # didn't start this month, we know it will end this month.
         r.day = 1
     r.repeat()
-    count = r.count
-    return count
+    return r.count
 
 
 def _handle_month_events(year, month, count, month_events):
@@ -404,13 +400,14 @@ def _handle_repeat_events(year, month, count, repeat_events):
     for event in repeat_events:
         kwargs = {'year': year, 'month': month, 'count': count, 'event': event}
         if event.repeats('WEEKLY') or event.repeats('BIWEEKLY'):
-            count = Weekly_Repeater(**kwargs).repeat_it()
+            r = Weekly_Repeater(**kwargs)
         elif event.repeats('MONTHLY'):
-            count = Monthly_Repeater(**kwargs).repeat_it()
+            r = Monthly_Repeater(**kwargs)
         elif event.repeats('DAILY') or event.repeats('WEEKDAY'):
-            count = Daily_Repeater(**kwargs).repeat_it()
+            r = Daily_Repeater(**kwargs)
         else:
-            count = Yearly_Repeater(**kwargs).repeat_it()
+            r = Yearly_Repeater(**kwargs)
+        count = r.repeat_it()
     return count
 
 
