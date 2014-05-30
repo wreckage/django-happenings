@@ -5,7 +5,7 @@ from datetime import datetime, date, timedelta
 from django.utils.timezone import make_aware, utc
 from django.test.utils import override_settings
 
-from happenings.utils.repeater import upcoming_events
+from happenings.utils.upcoming import upcoming_events
 from .event_factory import create_event, SetMeUp
 
 
