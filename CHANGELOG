@@ -1,9 +1,21 @@
+Version 0.1.2 (May 30, 2014)
+----------------------------
+
+  * Found and fixed a bug w/ next_event. Switched the 
+    calls to handle_count on lines 51/52.
+  * created Repeater class in handlers.py, and gave each type of 
+    repeat its own extended repeater class.
+  * Added a few more tests (including one to cover the next_event
+    bug).
+  * Changed utils/repeater.py to utils/upcoming.py
+  * Added version# and url to __init__.py
+
+
 Version 0.1.1 (May 27, 2014)
 ----------------------------
 
   * Added Python 3 support
   * Added Travis CI and Coveralls.
-
 
 
 Version 0.1 (May 20, 2014)
