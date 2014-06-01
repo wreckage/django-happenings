@@ -244,3 +244,15 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
+
+
+@python_2_unicode_compatible
+class Cancellation(models.Model):
+    event = models.ForeignKey(
+        Event, related_name="cancellations", related_query_name="cancellation"
+    )
+    reason = models.CharField(_("reason"), max_length=255)
+    date = models.DateField(_("date"))
+
+    def __str__(self):
+        return str(self.date)

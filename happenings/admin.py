@@ -1,7 +1,12 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
-from happenings.models import Event, Location, Category, Tag
+from happenings.models import Event, Location, Category, Tag, Cancellation
+
+
+class CancellationInline(admin.TabularInline):
+    model = Cancellation
+    extra = 0
 
 
 class EventAdmin(admin.ModelAdmin):
@@ -36,8 +41,10 @@ class EventAdmin(admin.ModelAdmin):
     list_filter = ['start_date']
     search_fields = ['title']
     date_hierarchy = 'start_date'
+    inlines = [CancellationInline]
 
 admin.site.register(Event, EventAdmin)
 admin.site.register(Location)
 admin.site.register(Category)
 admin.site.register(Tag)
+admin.site.register(Cancellation)
