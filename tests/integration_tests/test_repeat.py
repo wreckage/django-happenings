@@ -117,7 +117,9 @@ class RepeatingEventListViewTest(SetMeUp):
             description="Single event",
             repeat="WEEKLY",
         )
-        response = self.client.get(reverse('calendar:list'))
+        response = self.client.get(reverse(
+            'calendar:list', kwargs={'year': '2014', 'month': '5'}
+        ))
         match = re.findall('May 26, 12:00AM - 12:00AM', str(response.content))
         self.assertEqual(1, len(match))
 

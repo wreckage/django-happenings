@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from datetime import timedelta
+from datetime import timedelta, date
 
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -226,6 +226,18 @@ class ModelMethodsTest(SetMeUp):
     def test_tag_str(self):
         tag = Tag.objects.create(name="birthday")
         self.assertEqual(tag.__str__(), tag.name)
+
+    def test_cancellation_str(self):
+        event = create_event(
+            created_by=self.user,
+            title="The Event",
+            description="This is an event."
+        )
+        c = event.cancellations.create(
+            reason="Out of town",
+            date=date(2014, 5, 30)
+        )
+        self.assertEqual(c.__str__(), c.date.strftime('%Y-%m-%d'))
 
     def test_start_end_diff(self):
         """
