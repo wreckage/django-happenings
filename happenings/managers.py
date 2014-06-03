@@ -46,14 +46,14 @@ class EventManager(models.Manager):
             # only events that are still repeating
             Q(end_repeat=None) | Q(end_repeat__gte=ym_first),
             start_date__lte=ym_last  # no events that haven't started yet
-        ).filter(**kwargs).prefetch_related('location')
+        ).filter(**kwargs).prefetch_related('location', 'cancellations')
 
         # with yearly repeat
         b = self.model.objects.filter(
             Q(start_date__month=month) | Q(end_date__month=month),
             Q(end_repeat=None) | Q(end_repeat__gte=ym_first),
             repeat="YEARLY", start_date__lte=ym_last
-        ).filter(**kwargs).prefetch_related('location')
+        ).filter(**kwargs).prefetch_related('location', 'cancellations')
 
         # chain them together and return the set. The querysets will be
         # evaluated at this point.
@@ -67,7 +67,7 @@ class EventManager(models.Manager):
         """
         kwargs = self._get_kwargs(category, tag)
         return self.model.objects.within(year, month).filter(
-            **kwargs).prefetch_related('location')
+            **kwargs).prefetch_related('location', 'cancellations')
 
     def within(self, year, month):
         """Returns events within the given year and month."""

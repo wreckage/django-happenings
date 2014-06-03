@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from calendar import LocaleHTMLCalendar, month_name
+from datetime import date
 
 from django.conf import settings
 
@@ -17,7 +18,14 @@ class EventCalendar(LocaleHTMLCalendar):
         self.count = count  # defaultdict in {date:[title1, title2,]} format
         self.events = all_month_events
 
-    def popover_helper(self, day, event, pk, title):
+    def check_if_cancelled(self):
+        cancellations = self.event.cancellations.all()
+        d = date(self.yr, self.mo, self.day)
+        for cancellation in cancellations:
+            if cancellation.date == d:
+                self.title += " (CANCELLED)"
+
+    def popover_helper(self, day, event, pk):
         """Returns variables used to build popovers."""
         when = ('<p><b>When:</b> ' + month_name[self.mo] + ' ' +
                 str(day) + ', ' + event.l_start_date.strftime(
@@ -40,11 +48,12 @@ class EventCalendar(LocaleHTMLCalendar):
         event_url = event.get_absolute_url()
         t = "%I:%M%p" if event.l_start_date.minute else "%I%p"
         title2 = (event.l_start_date.strftime(t).lstrip('0') +
-                  ' ' + title)
+                  ' ' + self.title)
         return when, where, desc, event_url, title2
 
     def formatday(self, day, weekday):
         """Return a day as a table cell."""
+        self.day = day
 
         wkday_not_today = ('<td class="%s"><div class="td-inner">'
                            % self.cssclasses[weekday])
@@ -82,16 +91,19 @@ class EventCalendar(LocaleHTMLCalendar):
         # inject style and extras into calendar html
         for item in self.count[day]:
             pk = item[1]
-            title = item[0]
+            self.title = item[0]
             for event in self.events:
                 if event.pk == pk:
+                    self.event = event
+                    if event.cancellations.count():
+                        self.check_if_cancelled()
                     when, where, desc, event_url, title2 = self.popover_helper(
-                        day, event, pk, title
+                        day, event, pk
                     )
                     bg, fnt = event.get_colors()
             out += ('<a class="event-anch" href="' + event_url + '">' +
                     extras % (
-                        title,
+                        self.title,
                         detail % (when, where, desc, event_url),
                         common % (bg, fnt)
                     ) +
