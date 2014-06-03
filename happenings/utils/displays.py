@@ -13,7 +13,7 @@ LOC = str(getattr(settings, "CALENDAR_LOCALE", "en_US.utf8"))
 locale.setlocale(locale.LC_ALL, LOC)
 
 
-def _add_occurrence_and_popover(events, cal, mini, count):
+def add_occurrences(events, count):
     """
     Adds an occurrence key to the event object w/ a list of occurrences
     and adds a popover (for use with twitter bootstrap).
@@ -29,18 +29,6 @@ def _add_occurrence_and_popover(events, cal, mini, count):
                     except AttributeError:
                         event.occurrence = []
                         event.occurrence.append(day)
-                    if mini:  # add popover content if mini calendar
-                        t = "%I:%M%p" if event.l_start_date.minute else "%I%p"
-                        title = event.l_start_date.strftime(t).lstrip('0') + \
-                            ' - ' + event.title
-                        cal = cal.replace(
-                            '>%d</a><div data-content="<ul>' % day,
-                            ('>%d</a><div data-content="<ul>'
-                             '<li><a href=\'%s\'>%s</a></li>' % (
-                                 day, event.get_absolute_url(), title)
-                             )
-                        )
-    return cal
 
 
 def month_display(year, month, all_month_events,
@@ -61,14 +49,11 @@ def month_display(year, month, all_month_events,
                 if item[1] == event.pk:
                     l.insert(0, l.pop(l.index(item)))
 
+    args = (year, month, count, all_month_events, start_day, LOC)
     if not mini:
-        html_cal = EventCalendar(
-            year, month, count, all_month_events, start_day, LOC
-        ).formatmonth(year, month)
+        html_cal = EventCalendar(*args).formatmonth(year, month)
     else:
-        html_cal = MiniEventCalendar(
-            year, month, count, start_day, LOC
-        ).formatmonth(year, month)
+        html_cal = MiniEventCalendar(*args).formatmonth(year, month)
 
     nxt, prev = get_next_and_prev(net)
     extra_qs = ('&' + '&'.join(qs)) if qs else ''
@@ -84,9 +69,7 @@ def month_display(year, month, all_month_events,
         <a href="?cal_next=%d%s">&rarr;</a></th>' % (year, nxt, extra_qs)
     )
 
-    html_cal = _add_occurrence_and_popover(
-        all_month_events, html_cal, mini, count
-    )
+    add_occurrences(all_month_events, count)
 
     return html_cal
 
