@@ -49,6 +49,19 @@ class GenericCalendar(LocaleHTMLCalendar):
 
         self.end = '</div></td>'
 
+    def formatmonthname(self, theyear, themonth, withyear=True):
+        """
+        Change colspan to "5", add "today" button, and return a month
+        name as a table row.
+        """
+        if withyear:
+            s = '%s %s' % (month_name[themonth], theyear)
+        else:
+            s = '%s' % month_name[themonth]
+        return ('<tr><th colspan="5" class="month">'
+                '<button id="cal-today-btn" class="btn btn-small">'
+                'Today</button> %s</th></tr>' % s)
+
 class EventCalendar(GenericCalendar):
     def popover_helper(self):
         """Returns variables used to build popovers."""
@@ -125,19 +138,6 @@ class EventCalendar(GenericCalendar):
 
         return out + self.end
 
-    def formatmonthname(self, theyear, themonth, withyear=True):
-        """
-        Change colspan to "5", add "today" button, and return a month
-        name as a table row.
-        """
-        if withyear:
-            s = '%s %s' % (month_name[themonth], theyear)
-        else:
-            s = '%s' % month_name[themonth]
-        return ('<tr><th colspan="5" class="month">'
-                '<button id="cal-today-btn" class="btn btn-small">'
-                'Today</button> %s</th></tr>' % s)
-
 
 class MiniEventCalendar(GenericCalendar):
     def __init__(self, *args):
@@ -185,16 +185,3 @@ class MiniEventCalendar(GenericCalendar):
             return self.wkday_not_today + self.anch + self.cal_event + self.end
         else:
             return self.wkday_not_today + self.anch + self.end
-
-    def formatmonthname(self, theyear, themonth, withyear=True):
-        """
-        Change colspan to "5", add "today" button, and return a month
-        name as a table row.
-        """
-        if withyear:
-            s = '%s %s' % (month_name[themonth], theyear)
-        else:
-            s = '%s' % month_name[themonth]
-        return ('<tr><th colspan="5" class="month">'
-                '<button id="cal-today-btn" class="btn btn-small">'
-                'Today</button> %s</th></tr>' % s)
