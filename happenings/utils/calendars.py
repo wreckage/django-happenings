@@ -123,7 +123,7 @@ class EventCalendar(GenericCalendar):
                 if event.pk == self.pk:
                     self.event = event
                     self.check_if_cancelled()
-                    self.add_occurrence
+                    # self.add_occurrence
                     self.popover_helper()
                     bg, fnt = self.event.get_colors()
             out += ('<a class="event-anch" href="' + self.event_url + '">' +
