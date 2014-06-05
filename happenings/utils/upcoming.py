@@ -10,133 +10,139 @@ from django.utils.six.moves import xrange
 from happenings.utils.common import inc_month
 
 
-def _yearly(event, now, finish, num=5):
-    events = []
-    year = now.year
-    if event.l_start_date > now:  # event starts in the future
-        year = event.l_start_date.year
-    elif now.month > event.l_start_date.month:  # event occurred this year yet?
-        year += 1
-    # equal to? The event occurs this month, so check the day to see if passed
-    elif now.month == event.l_start_date.month:
-        if now.day > event.l_start_date.day:  # greater than? already occurred
-            year += 1
-    month = event.l_start_date.month
-    day = event.l_start_date.day
-    while num:
-        try:
-            start = make_aware(
-                datetime(year, month, day), get_default_timezone()
-            )
-            # change to date() so we can compare to event.end_repeat
-            start_ = date(year, month, day)
-        # value error most likely means that the event's start date doesn't
-        # appear this calendar month
-        except ValueError:
-            year += 1
-            continue
-        if start > finish or \
-                event.end_repeat is not None and start_ > event.end_repeat:
-            return events
-        events.append((start, event))
-        year += 1
-        num -= 1
-    return events
+class UpcomingEvents(object):
+    def __init__(self, event, now, finish, num=5):
+        self.event = event
+        self.now = now
+        self.finish = finish
+        self.num = num
+        self.events = []
 
+    def get_upcoming_events(self):
+        """
+        Repeats an event and returns 'num' (or fewer)
+        upcoming events from 'now'.
+        """
+        if self.event.repeats('NEVER'):
+            if self.event.end_date < self.now:
+                return self.events
+            self.events.append((self.event.l_start_date, self.event))
+            return self.events
+        if self.event.repeats('WEEKDAY'):
+            self._weekday()
+        elif self.event.repeats('MONTHLY'):
+            self._monthly()
+        elif self.event.repeats('YEARLY'):
+            self._yearly()
+        else:
+            self._others()
+        return self.events
 
-def _monthly(event, now, finish, num=5):
-    events = []
-    year = now.year
-    month = now.month
-    if event.l_start_date > now:  # event starts in the future
-        year = event.l_start_date.year
-        month = event.l_start_date.month
-    elif now.day > event.l_start_date.day:  # passed the event this month?
-        month, year = inc_month(month, year)
-    day = event.l_start_date.day
-    while num:
-        try:
-            start = make_aware(
-                datetime(year, month, day), get_default_timezone()
-            )
-            # change to date() so we can compare to event.end_repeat
-            start_ = date(year, month, day)
-        # value error most likely means that the event's start date doesn't
-        # appear this calendar month
-        except ValueError:
+    def we_should_stop(self, start, start_):
+        """
+        Checks 'start' to see if we should stop collecting upcoming events.
+        'start' should be a datetime.datetime, 'start_' should be the same
+        as 'start', but it should be a datetime.date to allow comparison
+        w/ end_repeat.
+        """
+        if start > self.finish or \
+                self.event.end_repeat is not None and \
+                start_ > self.event.end_repeat:
+            return True
+        else:
+            return False
+
+    def _yearly(self):
+        year = self.now.year
+        if self.event.l_start_date > self.now:  # event starts in the future
+            year = self.event.l_start_date.year
+        elif self.now.month > self.event.l_start_date.month:
+            year += 1
+        # The event occurs this month, so check the day to see if passed
+        elif self.now.month == self.event.l_start_date.month:
+            if self.now.day > self.event.l_start_date.day:  # already occurred
+                year += 1
+        month = self.event.l_start_date.month
+        day = self.event.l_start_date.day
+        while self.num:
+            try:
+                start = make_aware(
+                    datetime(year, month, day), get_default_timezone()
+                )
+                # change to date() so we can compare to event.end_repeat
+                start_ = date(year, month, day)
+            # value error most likely means that the event's start date doesn't
+            # appear this calendar month
+            except ValueError:
+                year += 1
+                continue
+            if self.we_should_stop(start, start_):
+                return
+            self.events.append((start, self.event))
+            year += 1
+            self.num -= 1
+
+    def _monthly(self):
+        year = self.now.year
+        month = self.now.month
+        if self.event.l_start_date > self.now:  # event starts in the future
+            year = self.event.l_start_date.year
+            month = self.event.l_start_date.month
+        elif self.now.day > self.event.l_start_date.day:  # event has passed
             month, year = inc_month(month, year)
-            continue
-        if start > finish or \
-                event.end_repeat is not None and start_ > event.end_repeat:
-            return events
-        events.append((start, event))
-        month, year = inc_month(month, year)
-        num -= 1
-    return events
+        day = self.event.l_start_date.day
+        while self.num:
+            try:
+                start = make_aware(
+                    datetime(year, month, day), get_default_timezone()
+                )
+                # change to date() so we can compare to event.end_repeat
+                start_ = date(year, month, day)
+            # value error most likely means that the event's start date doesn't
+            # appear this calendar month
+            except ValueError:
+                month, year = inc_month(month, year)
+                continue
+            if self.we_should_stop(start, start_):
+                return
+            self.events.append((start, self.event))
+            month, year = inc_month(month, year)
+            self.num -= 1
 
-
-def _weekday(event, now, finish, num=5):
-    events = []
-    if event.l_start_date > now:
-        start = event.l_start_date
-    else:
-        start = now
-    while start.weekday() > 4:
-        start += timedelta(days=1)
-    for i in xrange(num):
-        # change to date() so we can compare to event.end_repeat
-        start_ = date(start.year, start.month, start.day)
-        if start > finish or \
-                event.end_repeat is not None and start_ > event.end_repeat:
-            return events
+    def _weekday(self):
+        if self.event.l_start_date > self.now:
+            start = self.event.l_start_date
+        else:
+            start = self.now
         while start.weekday() > 4:
             start += timedelta(days=1)
-        events.append((start, event))
-        start += timedelta(days=1)
-    return events
+        for i in xrange(self.num):
+            # change to date() so we can compare to event.end_repeat
+            start_ = date(start.year, start.month, start.day)
+            if self.we_should_stop(start, start_):
+                return
+            while start.weekday() > 4:
+                start += timedelta(days=1)
+            self.events.append((start, self.event))
+            start += timedelta(days=1)
 
-
-def _others(event, now, finish, num=5):
-    events = []
-    repeat = {'WEEKLY': 7, 'BIWEEKLY': 14, 'DAILY': 1}
-    if event.repeats('DAILY'):
-        if event.l_start_date > now:
-            start = event.l_start_date
+    def _others(self):
+        repeat = {'WEEKLY': 7, 'BIWEEKLY': 14, 'DAILY': 1}
+        if self.event.repeats('DAILY'):
+            if self.event.l_start_date > self.now:
+                start = self.event.l_start_date
+            else:
+                start = self.now
         else:
-            start = now
-    else:
-        start = event.l_start_date
-        end = event.l_end_date
-        while end <= now:
-            start += timedelta(days=repeat[event.repeat])
-            end += timedelta(days=repeat[event.repeat])
-    for i in xrange(num):
-        # change to date() so we can compare to event.end_repeat
-        start_ = date(start.year, start.month, start.day)
-        if start > finish or \
-                event.end_repeat is not None and start_ > event.end_repeat:
-            return events
-        events.append((start, event))
-        start += timedelta(days=repeat[event.repeat])
-    return events
-
-
-def upcoming_events(event, now, finish, num=5):
-    """
-    Repeats an event and returns 'num' (or fewer) upcoming events from 'now'.
-    """
-    events = []
-    if event.repeats('NEVER'):
-        if event.end_date < now:
-            return events
-        events.append((event.l_start_date, event))
-        return events
-    if event.repeats('WEEKDAY'):
-        events = _weekday(event, now, finish, num)
-    elif event.repeats('MONTHLY'):
-        events = _monthly(event, now, finish, num)
-    elif event.repeats('YEARLY'):
-        events = _yearly(event, now, finish, num)
-    else:
-        events = _others(event, now, finish, num)
-    return events
+            start = self.event.l_start_date
+            end = self.event.l_end_date
+            while end <= self.now:
+                start += timedelta(days=repeat[self.event.repeat])
+                end += timedelta(days=repeat[self.event.repeat])
+        for i in xrange(self.num):
+            # change to date() so we can compare to event.end_repeat
+            start_ = date(start.year, start.month, start.day)
+            if self.we_should_stop(start, start_):
+                return
+            self.events.append((start, self.event))
+            start += timedelta(days=repeat[self.event.repeat])

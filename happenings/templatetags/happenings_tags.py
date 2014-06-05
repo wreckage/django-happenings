@@ -6,7 +6,7 @@ from django.template import Library
 from django.conf import settings
 from django.utils import timezone
 
-from happenings.utils import upcoming
+from happenings.utils.upcoming import UpcomingEvents
 from happenings.models import Event
 from happenings.utils.displays import month_display
 from happenings.utils.common import (
@@ -42,7 +42,7 @@ def show_calendar(req, mini=False):
 @register.inclusion_tag('happenings/partials/upcoming_events.html')
 def upcoming_events(now=timezone.localtime(timezone.now()), finish=90, num=5):
     finish = now + timezone.timedelta(days=finish)
-    all_upcoming = (upcoming.upcoming_events(x, now, finish, num)
+    all_upcoming = (UpcomingEvents(x, now, finish, num).get_upcoming_events()
                     for x in Event.objects.live(now))
     upcoming = sorted(
         (item for sublist in all_upcoming for item in sublist)

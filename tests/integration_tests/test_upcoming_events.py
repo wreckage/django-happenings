@@ -5,12 +5,15 @@ from datetime import datetime, date, timedelta
 from django.utils.timezone import make_aware, utc
 from django.test.utils import override_settings
 
-from happenings.utils.upcoming import upcoming_events
+from happenings.utils.upcoming import UpcomingEvents
 from .event_factory import create_event, SetMeUp
 
 
 @override_settings(TIME_ZONE='UTC')
 class UpcomingEventsTest(SetMeUp):
+    def upcoming_events(self, event, d, fin, num=5):
+        return UpcomingEvents(event, d, fin, num).get_upcoming_events()
+
     def test_yearly(self):
         """
         Test yearly repeat w/ 'now' month same as event.start_date.month, and
@@ -27,7 +30,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2014, 3, 3), utc)
         fin = d + timedelta(days=2000)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
         for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
@@ -52,7 +55,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2015, 3, 3), utc)
         fin = d + timedelta(days=4000)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
         for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
@@ -74,7 +77,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2015, 1, 1), utc)
         fin = d + timedelta(days=4000)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
         for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
@@ -96,7 +99,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2015, 4, 4), utc)
         fin = d + timedelta(days=4000)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
         for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
@@ -118,7 +121,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2013, 1, 1), utc)
         fin = d + timedelta(days=4000)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
         for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
@@ -142,7 +145,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2014, 3, 3), utc)
         fin = d + timedelta(days=4000)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 3)
         for i in range(1):
             self.assertEqual(events[i][1].title, event.title)
@@ -163,7 +166,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2014, 6, 6), utc)
         fin = d + timedelta(days=365)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
         for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
@@ -185,7 +188,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2015, 4, 6), utc)
         fin = d + timedelta(days=365)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
         for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
@@ -207,7 +210,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2014, 3, 3), utc)
         fin = d + timedelta(days=365)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 2)
 
     def test_monthly_future_event(self):
@@ -222,7 +225,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2015, 1, 6), utc)
         fin = d + timedelta(days=365)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
         self.assertEqual(events[0][0].date(), date(2015, 3, 10))
 
@@ -238,7 +241,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2014, 3, 6), utc)
         fin = d + timedelta(days=90)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
         for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
@@ -258,7 +261,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2013, 12, 1), utc)
         fin = d + timedelta(days=900)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
         self.assertEqual(events[0][0].date(), date(2014, 3, 1))
         self.assertEqual(events[1][0].date(), date(2014, 3, 8))
@@ -276,7 +279,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2014, 5, 8), utc)
         fin = d + timedelta(days=90)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
         for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
@@ -296,7 +299,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2014, 5, 6), utc)
         fin = d + timedelta(days=90)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
         for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
@@ -316,7 +319,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2013, 11, 6), utc)
         fin = d + timedelta(days=900)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
         self.assertEqual(events[0][0].date(), date(2014, 3, 1))
         self.assertEqual(events[1][0].date(), date(2014, 3, 2))
@@ -333,7 +336,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2014, 5, 3), utc)
         fin = d + timedelta(days=90)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
         for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
@@ -353,7 +356,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2014, 5, 7), utc)
         fin = d + timedelta(days=90)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
         for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
@@ -377,7 +380,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2014, 3, 3), utc)
         fin = d + timedelta(days=365)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 2)
 
     def test_weekday_event_in_future(self):
@@ -392,7 +395,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2014, 2, 7), utc)
         fin = d + timedelta(days=90)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 5)
         for i in range(5):
             self.assertEqual(events[i][1].title, event.title)
@@ -410,7 +413,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2014, 3, 3), utc)
         fin = d + timedelta(days=90)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 1)
         self.assertEqual(events[0][0], event.start_date)
         self.assertEqual(events[0][1].title, event.title)
@@ -431,7 +434,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2015, 3, 4), utc)
         fin = d + timedelta(days=90)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 0)
 
     def test_end_repeat(self):
@@ -448,7 +451,7 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2014, 3, 6), utc)
         fin = d + timedelta(days=90)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 1)
         self.assertEqual(events[0][0].date(), date(2014, 3, 8))
         self.assertEqual(events[0][1].title, event.title)
@@ -470,7 +473,7 @@ class UpcomingEventsTest(SetMeUp):
         d = make_aware(datetime(2014, 3, 6), utc)
         # set finish arg to 90 days from d
         fin = d + timedelta(days=90)
-        events = upcoming_events(event, d, fin)
+        events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 0)
 
     def test_different_num(self):
@@ -490,5 +493,5 @@ class UpcomingEventsTest(SetMeUp):
         )
         d = make_aware(datetime(2014, 3, 6), utc)
         fin = d + timedelta(days=900)
-        events = upcoming_events(event, d, fin, num)
-        self.assertEqual(len(events), 8)
+        events = self.upcoming_events(event, d, fin, num)
+        self.assertEqual(len(events), num)
