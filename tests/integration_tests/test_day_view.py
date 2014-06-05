@@ -1,11 +1,13 @@
 from __future__ import unicode_literals
 
+from datetime import date
+
 from django.core.urlresolvers import reverse
 
 from .event_factory import create_event, SetMeUp
 
 
-class EventListViewDisplayTest(SetMeUp):
+class EventDayListViewDisplayTest(SetMeUp):
     def test_list_view_year_and_month_and_day_in_url(self):
         """
         Test that an event shows up if a year & month & day are entered
@@ -107,3 +109,22 @@ class EventListViewDisplayTest(SetMeUp):
         )
         self.assertContains(response, 'birthdays')
         self.assertContains(response, 'doggies')
+
+    def test_day_list_view_cancelled_event(self):
+        """Test that a cancelled event displays correctly."""
+        event = create_event(
+            start_date=(2014, 5, 15),
+            end_date=(2014, 5, 15),
+            created_by=self.user,
+            title="Elspeth",
+            description="Angelic Event."
+        )
+        event.cancellations.create(
+            reason="Terror",
+            date=date(2014, 5, 15)
+        )
+        response = self.client.get(reverse(
+            'calendar:day_list',
+            kwargs={'year': '2014', 'month': '5', 'day': '15'}
+        ))
+        self.assertContains(response, event.title + ' (CANCELLED)')

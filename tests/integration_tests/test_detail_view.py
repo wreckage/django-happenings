@@ -103,7 +103,8 @@ class EventDetailViewTest(SetMeUp):
         match = re.findall("CANCELLED", str(response.content))
         self.assertEqual(1, len(match))
 
-    def test_detail_view_with_cancelled_single_day_event(self):
+    def test_detail_view_with_next_cancelled_single_day_event(self):
+        """Test that CANCELLED shows up if next event is cancelled."""
         d1 = timezone.now() - timedelta(days=1)
         event = create_event(
             start_date=(d1.year, d1.month, d1.day),
