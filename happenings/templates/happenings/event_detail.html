@@ -30,21 +30,24 @@
             <p>When:
             {% if event_days %}
                 {% for e in event_days %}
-                    Day {{ forloop.counter }}: {{ e }} - {{ event.end_date|date:"g:i a e" }}
+                <span>Day {{ forloop.counter }}: {{ e }} - {{ event.end_date|date:"g:i a e" }}
                     {% for c in event.cancellations.all %}
                         {% if c.date == e.date %}
                             (CANCELLED)
                         {% endif %}
                     {% endfor %}
+                </span>
                     <br>
                 {% endfor %}
+            </p>
             {% else %}
-                {% if event.start_date.day == event.end_date.day %}
-                    <b>{{ event.start_date }} - {{ event.end_date|date:"g:i a e" }}</p></b>
-                {% else %}
-                    <b>Start date: {{ event.start_date }}</b></p>
-                    <p><b>End date: {{ event.end_date }}</b></p>
-                {% endif %}
+                <b>{{ event.start_date }} - {{ event.end_date|date:"g:i a e" }}
+                {% for c in event.cancellations.all %}
+                    {% if c.date == event.start_date.date %}
+                        (CANCELLED)
+                    {% endif %}
+                {% endfor %}
+                </p></b>
             {% endif %}
         {% endif %}
         {% if event.location.all %}

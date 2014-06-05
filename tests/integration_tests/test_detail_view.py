@@ -1,7 +1,9 @@
 from __future__ import unicode_literals
 
-from datetime import date
+import re
+from datetime import date, timedelta
 
+from django.utils import timezone
 from django.core.urlresolvers import reverse
 
 from .event_factory import create_event, SetMeUp
@@ -46,8 +48,7 @@ class EventDetailViewTest(SetMeUp):
             repeat='MONTHLY',
         )
         response = self.client.get(reverse(
-            'calendar:detail',
-            kwargs={'pk': event.pk}
+            'calendar:detail', kwargs={'pk': event.pk}
         ))
         self.assertContains(response, "This event repeats")
 
@@ -62,10 +63,65 @@ class EventDetailViewTest(SetMeUp):
             end_repeat=date(2012, 5, 15)
         )
         response = self.client.get(reverse(
-            'calendar:detail',
-            kwargs={'pk': event.pk}
+            'calendar:detail', kwargs={'pk': event.pk}
         ))
         self.assertContains(response, "The last event was on")
+
+    def test_detail_view_with_cancelled_single_day_event(self):
+        event = create_event(
+            start_date=(2014, 5, 15),
+            end_date=(2014, 5, 15),
+            created_by=self.user,
+            title="The Event",
+            description="This event has been cancelled.",
+        )
+        event.cancellations.create(
+            reason="Out sick", date=date(2014, 5, 15)
+        )
+        response = self.client.get(reverse(
+            'calendar:detail', kwargs={'pk': event.pk}
+        ))
+        self.assertContains(response, "CANCELLED")
+
+    def test_detail_view_with_cancelled_non_repeating_chunk_event(self):
+        event = create_event(
+            start_date=(2014, 5, 15),
+            end_date=(2014, 5, 17),
+            created_by=self.user,
+            title="The Event",
+            description="Cancelled? Maybe.",
+        )
+        event.cancellations.create(
+            reason="Out sick", date=date(2014, 5, 16)
+        )
+        response = self.client.get(reverse(
+            'calendar:detail', kwargs={'pk': event.pk}
+        ))
+        self.assertContains(response, "Day 1: May 15, 2014")
+        self.assertContains(response, "Day 2: May 16, 2014")
+        self.assertContains(response, "Day 3: May 17, 2014")
+        match = re.findall("CANCELLED", str(response.content))
+        self.assertEqual(1, len(match))
+
+    def test_detail_view_with_cancelled_single_day_event(self):
+        d1 = timezone.now() - timedelta(days=1)
+        event = create_event(
+            start_date=(d1.year, d1.month, d1.day),
+            end_date=(d1.year, d1.month, d1.day),
+            created_by=self.user,
+            title="The Event",
+            description="Blah",
+            repeat="WEEKLY",
+        )
+        d2 = timezone.now() + timedelta(days=6)
+        event.cancellations.create(
+            reason="Out sick", date=d2
+        )
+        response = self.client.get(reverse(
+            'calendar:detail', kwargs={'pk': event.pk}
+        ))
+        self.assertContains(response, "Next event")
+        self.assertContains(response, "CANCELLED")
 
 
 class EventListViewTagTest(SetMeUp):
