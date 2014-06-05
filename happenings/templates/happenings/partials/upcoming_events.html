@@ -20,6 +20,11 @@
                     <a href="{{ event.get_absolute_url }}" style="color:{{ colors.1 }};">
                         {{ event.title }}
                     </a>
+                    {% for c in event.cancellations.all %}
+                        {% if c.date == d.date %}
+                            (CANCELLED)
+                        {% endif %}
+                    {% endfor %}
                 </div>
             </li>
         {% endwith %}

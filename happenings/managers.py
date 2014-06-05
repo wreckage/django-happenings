@@ -87,4 +87,4 @@ class EventManager(models.Manager):
         ).exclude(  # exclude single day events that won't occur again
             start_date__lt=now, end_date__lt=now,
             repeat="NEVER", end_repeat=None,
-        )
+        ).prefetch_related('cancellations')

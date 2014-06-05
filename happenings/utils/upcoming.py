@@ -53,6 +53,7 @@ class UpcomingEvents(object):
             return False
 
     def _yearly(self):
+        num = self.num
         year = self.now.year
         if self.event.l_start_date > self.now:  # event starts in the future
             year = self.event.l_start_date.year
@@ -64,7 +65,7 @@ class UpcomingEvents(object):
                 year += 1
         month = self.event.l_start_date.month
         day = self.event.l_start_date.day
-        while self.num:
+        while num:
             try:
                 start = make_aware(
                     datetime(year, month, day), get_default_timezone()
@@ -80,9 +81,10 @@ class UpcomingEvents(object):
                 return
             self.events.append((start, self.event))
             year += 1
-            self.num -= 1
+            num -= 1
 
     def _monthly(self):
+        num = self.num
         year = self.now.year
         month = self.now.month
         if self.event.l_start_date > self.now:  # event starts in the future
@@ -91,7 +93,7 @@ class UpcomingEvents(object):
         elif self.now.day > self.event.l_start_date.day:  # event has passed
             month, year = inc_month(month, year)
         day = self.event.l_start_date.day
-        while self.num:
+        while num:
             try:
                 start = make_aware(
                     datetime(year, month, day), get_default_timezone()
@@ -107,7 +109,7 @@ class UpcomingEvents(object):
                 return
             self.events.append((start, self.event))
             month, year = inc_month(month, year)
-            self.num -= 1
+            num -= 1
 
     def _weekday(self):
         if self.event.l_start_date > self.now:
