@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from datetime import date
+from datetime import date, timedelta
 from calendar import month_name
 from itertools import chain
 
@@ -52,7 +52,7 @@ class EventMonthView(GenericEventView):
         month = c.now.month + net
         month_orig = None
 
-        if not 'cal_ignore=true' in qs:
+        if 'cal_ignore=true' not in qs:
             if 'year' and 'month' in self.kwargs:  # try kwargs
                 year, month_orig = map(
                     int, (self.kwargs['year'], self.kwargs['month'])
@@ -181,9 +181,7 @@ class EventDetailView(DetailView):
         if not e.repeats('NEVER'):  # event is ongoing; get next occurrence
             if e.will_occur(c.now):
                 year, month, day = get_next_event(event, c.now)
-                context['next_event'] = dict(
-                    year=year, month=month_name[month], day=day
-                )
+                context['next_event'] = date(year, month, day)
             else:  # event is finished repeating; get last occurrence
                 end = e.end_repeat
                 last_event = end
@@ -193,4 +191,12 @@ class EventDetailView(DetailView):
                     )
                     last_event = date(year, month, day)
                 context['last_event'] = last_event
+        else:
+            if e.is_chunk():
+                # list of days for single-day event chunk
+                context['event_days'] = (  # list comp
+                    (e.l_start_date + timedelta(days=x))
+                    for x in range(e.start_end_diff() + 1)
+                )
+
         return context
