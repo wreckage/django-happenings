@@ -81,4 +81,5 @@ def day_display(year, month, month_events, repeat_events, day):
     # Create a set consisting of the pks of only those events that
     # occur on the given day
     pks = [x[1] for x in count[day]]
-    return Event.objects.filter(pk__in=pks).order_by('start_date')
+    return Event.objects.filter(pk__in=pks).order_by(
+        'start_date').prefetch_related('cancellations')

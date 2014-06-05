@@ -30,13 +30,13 @@
             <p>When:
             {% if event_days %}
                 {% for e in event_days %}
-                <span>Day {{ forloop.counter }}: {{ e }} - {{ event.end_date|date:"g:i a e" }}
+                    Day {{ forloop.counter }}: <b>{{ e }} - {{ event.end_date|date:"g:i a e" }}
                     {% for c in event.cancellations.all %}
                         {% if c.date == e.date %}
                             (CANCELLED)
                         {% endif %}
                     {% endfor %}
-                </span>
+                    </b>
                     <br>
                 {% endfor %}
             </p>

@@ -124,6 +124,13 @@ class EventMonthView(GenericEventView):
 class EventDayView(GenericEventView):
     template_name = 'happenings/event_day_list.html'
 
+    def check_for_cancelled_events(self, d):
+        """Check if any events are cancelled on the given date 'd'."""
+        for event in self.events:
+            for cn in event.cancellations.all():
+                if cn.date == d:
+                    event.title += ' (CANCELLED)'
+
     def get_context_data(self, **kwargs):
         context = super(EventDayView, self).get_context_data(**kwargs)
 
@@ -141,9 +148,12 @@ class EventDayView(GenericEventView):
             year, month, self.category, self.tag
         )
 
-        context['events'] = day_display(
+        self.events = day_display(
             year, month, month_events, repeat_events, day
         )
+
+        self.check_for_cancelled_events(d=date(year, month, day))
+        context['events'] = self.events
 
         context['month'] = month_name[month]
         context['month_num'] = month

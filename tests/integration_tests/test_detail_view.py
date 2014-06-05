@@ -97,9 +97,9 @@ class EventDetailViewTest(SetMeUp):
         response = self.client.get(reverse(
             'calendar:detail', kwargs={'pk': event.pk}
         ))
-        self.assertContains(response, "Day 1: May 15, 2014")
-        self.assertContains(response, "Day 2: May 16, 2014")
-        self.assertContains(response, "Day 3: May 17, 2014")
+        self.assertContains(response, "Day 1: <b>May 15, 2014")
+        self.assertContains(response, "Day 2: <b>May 16, 2014")
+        self.assertContains(response, "Day 3: <b>May 17, 2014")
         match = re.findall("CANCELLED", str(response.content))
         self.assertEqual(1, len(match))
 
