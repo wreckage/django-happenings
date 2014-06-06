@@ -74,11 +74,17 @@ def order_events(events, d=False):
     """
     ordered_events = {}
     for event in events:
-        for occ in event.occurrence:
-            try:
-                ordered_events[occ].append(event)
-            except Exception:
-                ordered_events[occ] = [event]
+        try:
+            for occ in event.occurrence:
+                try:
+                    ordered_events[occ].append(event)
+                except Exception:
+                    ordered_events[occ] = [event]
+        except AttributeError:  # no occurrence for this event
+            # This shouldn't happen, since an event w/o an occurrence
+            # shouldn't get this far, but if it does, just skip it since
+            # it shouldn't be displayed on the calendar anyway.
+            pass
 
     if d:
         # return as a dict without sorting by date

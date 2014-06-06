@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import datetime
-from itertools import chain
 from calendar import monthrange
 
 from django.db import models
@@ -25,9 +24,7 @@ class EventManager(models.Manager):
     def repeat(self, year, month, category=None, tag=None):
         """
         Returns events that repeat, and that should be displayed on the
-        calendar month. Yearly repeating events are handled separately b/c
-        they're the only ones that don't appear on every month before their
-        end_repeat date.
+        calendar month.
         """
         kwargs = self._get_kwargs(category, tag)
         ym_first = make_aware(
@@ -39,25 +36,17 @@ class EventManager(models.Manager):
             get_default_timezone()
         )
 
-        # without yearly repeat
-        a = self.model.objects.exclude(
-            Q(repeat="NEVER") | Q(repeat="YEARLY")
-        ).filter(
+        # for yearly repeat, we need to check the start and end date months
+        # b/c yearly events should occur every year in the same month
+        r = Q(repeat="YEARLY")
+        dstart = Q(start_date__month=month)
+        dend = Q(end_date__month=month)
+        return self.model.objects.filter(
             # only events that are still repeating
+            r & (dstart | dend) | (~Q(repeat="NEVER")),
             Q(end_repeat=None) | Q(end_repeat__gte=ym_first),
             start_date__lte=ym_last  # no events that haven't started yet
         ).filter(**kwargs).prefetch_related('location', 'cancellations')
-
-        # with yearly repeat
-        b = self.model.objects.filter(
-            Q(start_date__month=month) | Q(end_date__month=month),
-            Q(end_repeat=None) | Q(end_repeat__gte=ym_first),
-            repeat="YEARLY", start_date__lte=ym_last
-        ).filter(**kwargs).prefetch_related('location', 'cancellations')
-
-        # chain them together and return the set. The querysets will be
-        # evaluated at this point.
-        return set(chain(a, b))
 
     def month_events(self, year, month, category=None, tag=None):
         """
