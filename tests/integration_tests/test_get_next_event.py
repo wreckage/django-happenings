@@ -205,3 +205,21 @@ class NextEventTest(SetMeUp):
         date = datetime.date(2014, 5, 29)
         y, m, d = get_next_event(event, date)
         self.assertEqual((y, m, d), (2014, 6, 2))
+
+    def test_next_event_bugfix2(self):
+        """
+        This tests a bug that was discovered on June 6, 2014 that
+        had the wrong next event being shown for a yearly repeating event.
+        """
+        create_event(
+            start_date=(2014, 3, 15),
+            end_date=(2014, 3, 15),
+            created_by=self.user,
+            title="The Event",
+            description="This is an event. Enjoy.",
+            repeat="YEARLY",
+        )
+        event = Event.objects.all()
+        date = datetime.date(2014, 6, 6)
+        y, m, d = get_next_event(event, date)
+        self.assertEqual((y, m, d), (2015, 3, 15))

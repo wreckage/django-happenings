@@ -45,9 +45,12 @@ def get_next_event(event, now):
         else:
             occurrences = handle_count(year, month, [], event)
             future_dates = [x for x in occurrences if x >= now.day]
-            month = now.month
+            e_end_month = event[0].l_end_date.month
             while not future_dates:
                 month, year = inc_month(month, year)
+                if event[0].repeats('YEARLY') and \
+                        (month != e_month or month != e_end_month):
+                    continue
                 occurrences = handle_count(year, month, [], event) or \
                     handle_count(year, month, event, [])
                 # we don't check for now.day here, b/c we're in a month past
