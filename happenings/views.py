@@ -104,7 +104,7 @@ class EventMonthView(GenericEventView):
 
         # Using set ensures we don't have duplicates. List enables sorting.
         all_month_events = list(set(chain(repeat_events, month_events)))
-        all_month_events.sort(key=lambda x: x.start_date)
+        all_month_events.sort(key=lambda x: x.l_start_date.hour)
 
         start_day = getattr(settings, "CALENDAR_START_DAY", 0)
         context['calendar'] = month_display(
