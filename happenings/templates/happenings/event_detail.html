@@ -2,54 +2,53 @@
 {% load staticfiles %}
 
 {% block content %}
-    <h1>Event Detail</h1>
-        <h2>{{ event.title }}</h2>
+        <h1>{{ event.title }}</h1>
+        <p>{{ event.description }}</p>
 
         {% if event.start_end_diff %}
-            <h3>This is a {{ event.start_end_diff|add:"1" }} day event.</h3>
+            <b>This is a {{ event.start_end_diff|add:"1" }} day event.</b><br>
         {% endif %}
 
         {% if next_event %}
-        <h3>This event repeats {{ repeat | lower }}.</h3>
+        <b>This event repeats {{ repeat | lower }}.</b>
             <p>
                 Next event date: 
-                <b>
-                    {{ next_event|date:"F d, Y" }}
+                    {{ next_event|date:"D F d, Y" }}
                     {{ event.start_date|date:"g:i a" }} -
-                    {{ event.end_date|date:"g:i a e" }}
-                    {% for c in event.cancellations.all %}
-                        {% if c.date == next_event %}
-                            (CANCELLED)
-                        {% endif %}
-                    {% endfor %}
-            </b>(today is: {% now "SHORT_DATE_FORMAT" %})</p>
+                    {{ event.end_date|date:"g:i a e" }}{% if next_or_prev_cncl %} (CANCELLED){% endif %}
         {% elif last_event %}
-            <h3>This was an event that repeated {{ repeat | lower }}.</h3>
-            <p>The last event was on {{ last_event }}</p>
+            <b>This was an event that repeated {{ repeat | lower }}.</b>
+            <p>The last event was on {{ last_event|date:"D F d, Y" }}{% if next_or_prev_cncl %} (CANCELLED){% endif %}
         {% else %}
             <p>When:
             {% if event_days %}
+                <ul>
                 {% for e in event_days %}
-                    Day {{ forloop.counter }}: <b>{{ e }} - {{ event.end_date|date:"g:i a e" }}
-                    {% for c in event.cancellations.all %}
-                        {% if c.date == e.date %}
-                            (CANCELLED)
-                        {% endif %}
+                    <li>
+                        Day {{ forloop.counter }}: {{ e|date:"D F d, Y" }} - {{ event.end_date|date:"g:i a e" }}
+                        {% for c in event.cancellations.all %}
+                            {% if c.date == e.date %}
+                                (CANCELLED)
+                            {% endif %}
+                    </li>
                     {% endfor %}
-                    </b>
-                    <br>
                 {% endfor %}
-            </p>
+                </ul>
             {% else %}
-                <b>{{ event.start_date }} - {{ event.end_date|date:"g:i a e" }}
-                {% for c in event.cancellations.all %}
-                    {% if c.date == event.start_date.date %}
-                        (CANCELLED)
-                    {% endif %}
-                {% endfor %}
-                </p></b>
+                    {{ event.start_date|date:"D F d, Y" }} - {{ event.end_date|date:"g:i a e" }}
+                    {% if this_cncl %} (CANCELLED){% endif %}
             {% endif %}
         {% endif %}
+        (today is: {% now "D M d, Y" %})</p>
+        {% if cncl_days %}
+            <p>This event has been cancelled on the following day(s):</p>
+            <ul>
+            {% for d, reason in cncl_days %}
+                <li>{{ d|date:"D F d, Y" }} - Reason: {{ reason }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+
         {% if event.location.all %}
         <p>Location{{ event.location.all|pluralize }}:<br>
         {% for l in event.location.all %}
@@ -65,7 +64,6 @@
         </p>
         {% endif %}
 
-        <p>{{ event.description }}</p>
 
         {% if event.categories.all %}
             Categor{{ event.categories.all|pluralize:"y,ies" }}:

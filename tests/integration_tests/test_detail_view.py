@@ -97,9 +97,9 @@ class EventDetailViewTest(SetMeUp):
         response = self.client.get(reverse(
             'calendar:detail', kwargs={'pk': event.pk}
         ))
-        self.assertContains(response, "Day 1: <b>May 15, 2014")
-        self.assertContains(response, "Day 2: <b>May 16, 2014")
-        self.assertContains(response, "Day 3: <b>May 17, 2014")
+        self.assertContains(response, "Day 1: Thu May 15, 2014")
+        self.assertContains(response, "Day 2: Fri May 16, 2014")
+        self.assertContains(response, "Day 3: Sat May 17, 2014")
         match = re.findall("CANCELLED", str(response.content))
         self.assertEqual(1, len(match))
 
@@ -123,6 +123,29 @@ class EventDetailViewTest(SetMeUp):
         ))
         self.assertContains(response, "Next event")
         self.assertContains(response, "CANCELLED")
+
+    def test_detail_view_with_cancelled_event_in_past(self):
+        """Events that were cancelled in the past shouldn't show, but events
+        in the future should."""
+        event = create_event(
+            start_date=(2014, 4, 15),
+            end_date=(2014, 4, 15),
+            created_by=self.user,
+            title="The Event",
+            description="doom",
+            repeat="MONTHLY"
+        )
+        event.cancellations.create(
+            reason="Out sick", date=date(2025, 5, 15)
+        )
+        event.cancellations.create(
+            reason="Surfing", date=date(2014, 5, 15)
+        )
+        response = self.client.get(reverse(
+            'calendar:detail', kwargs={'pk': event.pk}
+        ))
+        self.assertContains(response, "Thu May 15, 2025")
+        self.assertNotContains(response, "Thu May 15, 2014")
 
 
 class EventListViewTagTest(SetMeUp):

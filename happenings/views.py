@@ -174,24 +174,37 @@ class EventDetailView(DetailView):
 
     def get_object(self):
         return get_object_or_404(
-            Event.objects.prefetch_related('location', 'categories', 'tags'),
+            Event.objects.prefetch_related(
+                'location', 'categories', 'tags', 'cancellations'
+            ),
             pk=self.kwargs['pk']
         )
 
+    def get_cncl_days(self):
+        cncl = self.object.cancellations.all()
+        return [(x.date, x.reason) for x in cncl if x.date >= c.now.date()]
+
+    def check_cncl(self, d):
+        cncl = self.object.cancellations.all()
+        return True if [x for x in cncl if x.date == d] else False
+
     def get_context_data(self, **kwargs):
         context = super(EventDetailView, self).get_context_data(**kwargs)
-
         e = self.object
 
         for choice in Event.REPEAT_CHOICES:
             if choice[0] == e.repeat:
                 context['repeat'] = choice[1]
 
+        context['cncl_days'] = self.get_cncl_days()
+
         event = [e]  # event needs to be an iterable, see get_next_event()
         if not e.repeats('NEVER'):  # event is ongoing; get next occurrence
             if e.will_occur(c.now):
                 year, month, day = get_next_event(event, c.now)
+                next_event = date(year, month, day)
                 context['next_event'] = date(year, month, day)
+                context['next_or_prev_cncl'] = self.check_cncl(next_event)
             else:  # event is finished repeating; get last occurrence
                 end = e.end_repeat
                 last_event = end
@@ -201,6 +214,7 @@ class EventDetailView(DetailView):
                     )
                     last_event = date(year, month, day)
                 context['last_event'] = last_event
+                context['next_or_prev_cncl'] = self.check_cncl(last_event)
         else:
             if e.is_chunk():
                 # list of days for single-day event chunk
@@ -208,5 +222,8 @@ class EventDetailView(DetailView):
                     (e.l_start_date + timedelta(days=x))
                     for x in range(e.start_end_diff() + 1)
                 )
-
+            else:
+                # let template know if this single-day, non-repeating event is
+                # cancelled
+                context['this_cncl'] = self.check_cncl(e.l_start_date.date())
         return context
