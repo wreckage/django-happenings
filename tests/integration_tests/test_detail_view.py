@@ -105,7 +105,7 @@ class EventDetailViewTest(SetMeUp):
 
     def test_detail_view_with_next_cancelled_single_day_event(self):
         """Test that CANCELLED shows up if next event is cancelled."""
-        d1 = timezone.now() - timedelta(days=1)
+        d1 = timezone.localtime(timezone.now() - timedelta(days=3))
         event = create_event(
             start_date=(d1.year, d1.month, d1.day),
             end_date=(d1.year, d1.month, d1.day),
@@ -114,7 +114,7 @@ class EventDetailViewTest(SetMeUp):
             description="Blah",
             repeat="WEEKLY",
         )
-        d2 = timezone.now() + timedelta(days=6)
+        d2 = timezone.localtime(timezone.now() + timedelta(days=4))
         event.cancellations.create(
             reason="Out sick", date=d2
         )

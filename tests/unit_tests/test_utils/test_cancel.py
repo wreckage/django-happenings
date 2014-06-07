@@ -58,7 +58,7 @@ class CancelledEventsTest(SetMeUp):
             date=date(2014, 5, 22)
         )
         days = (15, 16, 22, 23, 29, 30)
-        (count[day].append((event.title, event.pk)) for day in days)
+        [count[day].append((event.title, event.pk)) for day in days]
         events = [event]
         cal = GenericCalendar(yr, mo, count, events)
         cal.event = event

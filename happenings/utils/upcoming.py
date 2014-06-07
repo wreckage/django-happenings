@@ -13,8 +13,8 @@ from happenings.utils.common import inc_month
 class UpcomingEvents(object):
     def __init__(self, event, now, finish, num=5):
         self.event = event
-        self.now = now
-        self.finish = finish
+        self.now = now        # datetime.datetime
+        self.finish = finish  # datetime.datetime
         self.num = num
         self.events = []
 

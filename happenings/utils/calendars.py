@@ -18,12 +18,12 @@ class GenericCalendar(LocaleHTMLCalendar):
         self.count = count  # defaultdict in {date:[title1, title2,]} format
         self.events = all_month_events
 
-    def add_occurrence(self):
-        try:
-            self.event.occurrence.append(self.day)
-        except AttributeError:
-            self.event.occurrence = []
-            self.event.occurrence.append(self.day)
+#    def add_occurrence(self):
+#        try:
+#            self.event.occurrence.append(self.day)
+#        except AttributeError:
+#            self.event.occurrence = []
+#            self.event.occurrence.append(self.day)
 
     def check_if_cancelled(self):
         if self.event.cancellations.count():
@@ -61,6 +61,7 @@ class GenericCalendar(LocaleHTMLCalendar):
         return ('<tr><th colspan="5" class="month">'
                 '<button id="cal-today-btn" class="btn btn-small">'
                 'Today</button> %s</th></tr>' % s)
+
 
 class EventCalendar(GenericCalendar):
     def popover_helper(self):
