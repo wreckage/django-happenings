@@ -10,6 +10,7 @@ Features:
 
 * Repeating and non-repeating events
 * Events that start and end on different days
+* Support for cancelled events
 * Upcoming events list
 * AJAX support
 * Default CSS & Javascript to help you get started
@@ -19,9 +20,15 @@ Coming soon:
 * better integration of categories and tags
 * more views, including an agenda view
 * support for users
-* support for cancelled events
 * ++ more
 
+
+Note about upgrading from previous versions: Upgrading your version of the app 
+is a good idea, but be aware that some updates to the app involve changes 
+to models, which may cause problems with your database. For this reason 
+I've included south migrations to help make upgrading easier. But you 
+should always be cautious and make sure to backup your database before 
+upgrading. To see a list of changes made for each version view the CHANGELOG.
 
 Dependencies
 ------------

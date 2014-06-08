@@ -1,3 +1,22 @@
+Version 0.2 (June 08, 2014)
+---------------------------
+
+  * Added support for cancelled events.
+    * Added Cancellation foreign key to Event
+    * Month calendar displays (CANCELLED) after title of cancelled events
+    * Upcoming Events displays (CANCELLED) after title of cancelled events
+    * Day template displays (CANCELLED) after title of cancelled events
+    * Detail template displays (CANCELLED) after next/prev event if cancelled
+    * Detail template shows a list of cancelled events
+  * Added South migration for Cancellation foreign key
+  * Fixed a bug with get_next_event
+  * Fixed a bug with events not sorted by earliest time on calendar
+  * Updated repeat() in managers.py to make half as many db queries
+  * Moved things around in detail template
+  * Refactored upcoming.py to use class UpcomingEvents
+  * Added tests to cover bug fixes and cancelled events
+
+
 Version 0.1.2 (May 30, 2014)
 ----------------------------
 
