@@ -255,4 +255,4 @@ class Cancellation(models.Model):
     date = models.DateField(_("date"))
 
     def __str__(self):
-        return str(self.date)
+        return self.event.title + ' - ' + str(self.date)

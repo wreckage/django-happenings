@@ -237,7 +237,8 @@ class ModelMethodsTest(SetMeUp):
             reason="Out of town",
             date=date(2014, 5, 30)
         )
-        self.assertEqual(c.__str__(), c.date.strftime('%Y-%m-%d'))
+        self.assertEqual(c.__str__(),
+                         event.title + ' - ' + c.date.strftime('%Y-%m-%d'))
 
     def test_start_end_diff(self):
         """
