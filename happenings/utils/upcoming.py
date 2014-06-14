@@ -24,7 +24,9 @@ class UpcomingEvents(object):
         upcoming events from 'now'.
         """
         if self.event.repeats('NEVER'):
-            if self.event.end_date < self.now:
+            has_ended = self.event.end_date < self.now
+            has_not_started = self.event.l_start_date > self.finish
+            if has_ended or has_not_started:
                 return self.events
             self.events.append((self.event.l_start_date, self.event))
             return self.events
