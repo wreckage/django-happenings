@@ -39,14 +39,21 @@ class EventManager(models.Manager):
         # for yearly repeat, we need to check the start and end date months
         # b/c yearly events should occur every year in the same month
         r = Q(repeat="YEARLY")
-        dstart = Q(start_date__month=month)
-        dend = Q(end_date__month=month)
+        dstart_mo = Q(start_date__month=month)
+        dend_mo = Q(end_date__month=month)
+
+        dstart_yr = Q(start_date__year=year)
+        dend_yr = Q(end_date__year=year)
+
         return self.model.objects.filter(
             # only events that are still repeating
-            r & (dstart | dend) | (~Q(repeat="NEVER")),
+            r & (dstart_mo | dend_mo) |
+            (~Q(repeat="NEVER")) |
+            ((dstart_yr | dend_yr) & (dstart_mo | dend_yr)),
             Q(end_repeat=None) | Q(end_repeat__gte=ym_first),
             start_date__lte=ym_last  # no events that haven't started yet
-        ).filter(**kwargs).prefetch_related('location', 'cancellations')
+        ).filter(**kwargs).prefetch_related(
+            'location', 'cancellations').distinct()
 
     def month_events(self, year, month, category=None, tag=None):
         """

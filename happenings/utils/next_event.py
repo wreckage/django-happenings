@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from datetime import date
 
 from .common import check_weekday, inc_month
-from .handlers import handle_count
+from .handlers import CountHandler
 
 
 def get_next_event(event, now):
@@ -29,7 +29,7 @@ def get_next_event(event, now):
     # repeat_events
     if event[0].starts_same_year_month_as(year, month) and \
             e_day <= now.day <= e_end_day:
-        occurrences = handle_count(year, month, event, [])
+        occurrences = CountHandler(year, month, event).get_count()
         future_dates = (x for x in occurrences if x >= now.day)
         day = min(future_dates, key=lambda x: abs(x - now.day))
     else:
@@ -43,7 +43,7 @@ def get_next_event(event, now):
             month = e_month
             day = e_day
         else:
-            occurrences = handle_count(year, month, [], event)
+            occurrences = CountHandler(year, month, event).get_count()
             future_dates = [x for x in occurrences if x >= now.day]
             e_end_month = event[0].l_end_date.month
             while not future_dates:
@@ -51,8 +51,7 @@ def get_next_event(event, now):
                 if event[0].repeats('YEARLY') and \
                         (month != e_month or month != e_end_month):
                     continue
-                occurrences = handle_count(year, month, [], event) or \
-                    handle_count(year, month, event, [])
+                occurrences = CountHandler(year, month, event).get_count()
                 # we don't check for now.day here, b/c we're in a month past
                 # whatever now is. As an example, if we checked for now.day
                 # we'd get stuck in an infinite loop if this were a
