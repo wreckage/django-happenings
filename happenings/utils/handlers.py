@@ -408,10 +408,7 @@ class CountHandler(object):
         kwargs = {'year': self.year, 'month': self.month, 'count': self.count}
         for event in self.events:
             kwargs['event'] = event
-            if (event.l_start_date.year == self.year or
-                event.l_end_date.year == self.year) and (
-                    event.l_start_date.month == self.month or
-                    event.l_end_date.month == self.month):
+            if event.starts_ends_yr_mo(self.year, self.month):
                 self._handle_month_event(event)
             if event.repeats('WEEKLY') or event.repeats('BIWEEKLY'):
                 r = Weekly_Repeater(**kwargs)

@@ -32,7 +32,7 @@ def add_occurrences(events, count):
 
 
 def month_display(year, month, all_month_events,
-                  repeat_events, start_day, net, qs, mini=False):
+                  start_day, net, qs, mini=False):
     """
     A function that returns an html calendar for the given
     month in the given year, with the number of events for that month
@@ -40,7 +40,7 @@ def month_display(year, month, all_month_events,
     should start on (default is Monday).
     """
     # count the number of times events happen on a given day
-    count = CountHandler(year, month, repeat_events).get_count()
+    count = CountHandler(year, month, all_month_events).get_count()
 
     # sort count by start date using all_month_events (which is already sorted)
     for event in all_month_events[::-1]:
@@ -74,10 +74,10 @@ def month_display(year, month, all_month_events,
     return html_cal
 
 
-def day_display(year, month, repeat_events, day):
+def day_display(year, month, all_month_events, day):
     """Returns the events that occur on the given day."""
     # Get a dict with all of the events for the month
-    count = CountHandler(year, month, repeat_events).get_count()
+    count = CountHandler(year, month, all_month_events).get_count()
     # Create a set consisting of the pks of only those events that
     # occur on the given day
     pks = [x[1] for x in count[day]]

@@ -95,21 +95,18 @@ class EventMonthView(GenericEventView):
         if error:  # send any year/month errors
             context['cal_error'] = error
 
-        #month_events = Event.objects.month_events(
-        #    year, month, self.category, self.tag
-        #)
-        repeat_events = Event.objects.repeat(
-            year, month, self.category, self.tag
-        )
+        # List enables sorting. As far as I can tell, .order_by() can't be used
+        # here because we need it ordered by l_start_date.hour (simply ordering
+        # by start_date won't work)
+        all_month_events = list(Event.objects.all_month_events(
+                year, month, self.category, self.tag, loc=True, cncl=True
+        ))
 
-        # List enables sorting.
-        all_month_events = list(repeat_events)
         all_month_events.sort(key=lambda x: x.l_start_date.hour)
 
         start_day = getattr(settings, "CALENDAR_START_DAY", 0)
         context['calendar'] = month_display(
-            year, month, all_month_events,
-            repeat_events, start_day, self.net, qs, mini
+            year, month, all_month_events, start_day, self.net, qs, mini
         )
 
         context['show_events'] = False
@@ -141,15 +138,12 @@ class EventDayView(GenericEventView):
         if error:
             context['cal_error'] = error
 
-        # month_events = Event.objects.month_events(
-        #     year, month, self.category, self.tag
-        # )
-        repeat_events = Event.objects.repeat(
+        all_month_events = Event.objects.all_month_events(
             year, month, self.category, self.tag
         )
 
         self.events = day_display(
-            year, month, repeat_events, day
+            year, month, all_month_events, day
         )
 
         self.check_for_cancelled_events(d=date(year, month, day))

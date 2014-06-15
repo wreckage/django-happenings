@@ -21,12 +21,9 @@ class EventManager(models.Manager):
                 kwargs[k] = v
         return kwargs
 
-    def repeat(self, year, month, category=None, tag=None):
-        """
-        Returns events that repeat, and that should be displayed on the
-        calendar month.
-        """
-        kwargs = self._get_kwargs(category, tag)
+    @staticmethod
+    def get_first_and_last(year, month):
+        """Returns two datetimes: first day and last day of given year&month"""
         ym_first = make_aware(
             datetime.datetime(year, month, 1),
             get_default_timezone()
@@ -35,6 +32,22 @@ class EventManager(models.Manager):
             datetime.datetime(year, month, monthrange(year, month)[1]),
             get_default_timezone()
         )
+        return ym_first, ym_last
+
+    def all_month_events(self, year, month, category=None, tag=None,
+                         loc=False, cncl=False):
+        """
+        Returns events that repeat, and that should be displayed on the
+        calendar month.
+        """
+        kwargs = self._get_kwargs(category, tag)
+        ym_first, ym_last = self.get_first_and_last(year, month)
+
+        pref = []
+        if loc:
+            pref.append("location")
+        if cncl:
+            pref.append("cancellations")
 
         # for yearly repeat, we need to check the start and end date months
         # b/c yearly events should occur every year in the same month
@@ -47,13 +60,12 @@ class EventManager(models.Manager):
 
         return self.model.objects.filter(
             # only events that are still repeating
-            r & (dstart_mo | dend_mo) |
-            (~Q(repeat="NEVER")) |
-            ((dstart_yr | dend_yr) & (dstart_mo | dend_yr)),
+            r & (dstart_mo | dend_mo) |  # yearly repeat
+            (~Q(repeat="NEVER")) |  # all other repeats
+            ((dstart_yr | dend_yr) & (dstart_mo | dend_yr)),  # non-repeating
             Q(end_repeat=None) | Q(end_repeat__gte=ym_first),
             start_date__lte=ym_last  # no events that haven't started yet
-        ).filter(**kwargs).prefetch_related(
-            'location', 'cancellations').distinct()
+        ).filter(**kwargs).prefetch_related(*pref).distinct()
 
     def month_events(self, year, month, category=None, tag=None):
         """

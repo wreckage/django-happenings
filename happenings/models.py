@@ -118,6 +118,11 @@ class Event(models.Model):
         return (True if self.l_start_date.month == self.l_end_date.month
                 else False)
 
+    def starts_ends_yr_mo(self, year, month):
+        yr =  self.l_start_date.year == year or self.l_end_date.year == year
+        mo = self.l_start_date.month == month or self.l_end_date.month == month
+        return yr and mo
+
     def start_end_diff(self):
         """Return the difference between start and end dates."""
         s = self.l_start_date
