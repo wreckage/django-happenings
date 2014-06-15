@@ -43,8 +43,8 @@ def show_calendar(req, mini=False):
 @register.inclusion_tag('happenings/partials/upcoming_events.html')
 def upcoming_events(now=timezone.localtime(timezone.now()), finish=90, num=5):
     finish = now + timezone.timedelta(days=finish)
-    all_upcoming = [UpcomingEvents(x, now, finish, num).get_upcoming_events()
-                    for x in Event.objects.live(now)]
+    all_upcoming = (UpcomingEvents(x, now, finish, num).get_upcoming_events()
+                    for x in Event.objects.live(now))
     upcoming = heapq.nsmallest(
         num,
         (item for sublist in all_upcoming for item in sublist),
