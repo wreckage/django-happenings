@@ -91,32 +91,27 @@ class Event(models.Model):
         return timezone.localtime(self.end_date)
 
     def repeats(self, repeat):
-        return True if self.repeat == repeat else False
+        return self.repeat == repeat
 
     def is_chunk(self):
-        return True if self.l_start_date.day != self.l_end_date.day else False
+        return self.l_start_date.day != self.l_end_date.day
 
     def starts_same_month_as(self, month):
-        return True if self.l_start_date.month == month else False
+        return self.l_start_date.month == month
 
     def ends_same_month_as(self, month):
-        return True if self.l_end_date.month == month else False
+        return self.l_end_date.month == month
 
     def starts_same_year_month_as(self, year, month):
-        if self.l_start_date.year == year and self.l_start_date.month == month:
-            return True
-        else:
-            return False
+        return self.l_start_date.year == year and \
+            self.l_start_date.month == month
 
     def starts_same_month_not_year_as(self, month, year):
-        if self.l_start_date.year != year and self.l_start_date.month == month:
-            return True
-        else:
-            return False
+        return self.l_start_date.year != year and \
+            self.l_start_date.month == month
 
     def starts_ends_same_month(self):
-        return (True if self.l_start_date.month == self.l_end_date.month
-                else False)
+        return self.l_start_date.month == self.l_end_date.month
 
     def starts_ends_yr_mo(self, year, month):
         yr =  self.l_start_date.year == year or self.l_end_date.year == year
@@ -145,11 +140,8 @@ class Event(models.Model):
 
     def will_occur(self, now):
         """Returns True if the event will occur again after 'now'."""
-        if self.end_repeat is None or self.end_repeat >= now.date() or \
-                self.l_start_date >= now or self.l_end_date >= now:
-            return True
-        else:
-            return False
+        return self.end_repeat is None or self.end_repeat >= now.date() or \
+                self.l_start_date >= now or self.l_end_date >= now
 
     def __str__(self):
         return self.title
