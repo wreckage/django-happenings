@@ -37,8 +37,8 @@ class EventManager(models.Manager):
     def all_month_events(self, year, month, category=None, tag=None,
                          loc=False, cncl=False):
         """
-        Returns events that repeat, and that should be displayed on the
-        calendar month.
+        Returns all events that have an occurrence within the given
+        month & year.
         """
         kwargs = self._get_kwargs(category, tag)
         ym_first, ym_last = self.get_first_and_last(year, month)
@@ -72,6 +72,7 @@ class EventManager(models.Manager):
         Returns the events within the given month and year. If category
         and/or tag is given, the events returned will have
         those categories/tags.
+        No longer used since all_month_events() (above) was created.
         """
         kwargs = self._get_kwargs(category, tag)
         return self.model.objects.within(year, month).filter(

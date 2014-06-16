@@ -75,7 +75,11 @@ def month_display(year, month, all_month_events,
 
 
 def day_display(year, month, all_month_events, day):
-    """Returns the events that occur on the given day."""
+    """
+    Returns the events that occur on the given day.
+    Works by getting all occurrences for the month, then drilling
+    down to only those occurring on the given day.
+    """
     # Get a dict with all of the events for the month
     count = CountHandler(year, month, all_month_events).get_count()
     # Create a set consisting of the pks of only those events that

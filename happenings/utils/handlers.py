@@ -9,12 +9,12 @@ from django.utils.six.moves import xrange
 class Repeater(object):
     def __init__(self, count, year, month, day=None, end_repeat=None,
                  event=None, num=7, count_first=False, end_on=None):
-        self.count = count
+        self.count = count  # defaultdict(list)
         self.year = year
         self.month = month
         self.day = day
-        self.end_repeat = end_repeat
-        self.event = event
+        self.end_repeat = end_repeat  # datetime.date()
+        self.event = event  # Event object
         self.num = num
         self.count_first = count_first
         self.end_on = end_on
@@ -125,7 +125,7 @@ class Repeater(object):
         return r.count
 
 
-class Yearly_Repeater(Repeater):
+class YearlyRepeater(Repeater):
     def _repeat_chunk(self):
         self.day = self.event.l_start_date.day
         self.num = 1
@@ -161,7 +161,7 @@ class Yearly_Repeater(Repeater):
         return self.count
 
 
-class Monthly_Repeater(Repeater):
+class MonthlyRepeater(Repeater):
     def _repeat_chunk(self):
         start_day = self.event.l_start_date.day
         last_day_last_mo = date(self.year, self.month, 1) - timedelta(days=1)
@@ -201,7 +201,7 @@ class Monthly_Repeater(Repeater):
         return self.count
 
 
-class Daily_Repeater(Repeater):
+class DailyRepeater(Repeater):
     """Handles repeating daily and every weekday."""
     def repeat_it(self):
         if self.event.end_repeat is not None:
@@ -226,7 +226,7 @@ class Daily_Repeater(Repeater):
         return self.count
 
 
-class Weekly_Repeater(Repeater):
+class WeeklyRepeater(Repeater):
     def _biweekly_helper(self):
         """Created to take some of the load off of _handle_weekly_repeat_out"""
         self.num = 14
@@ -309,6 +309,8 @@ class Weekly_Repeater(Repeater):
         return self.count
 
 
+# XXX _first_weekday() and _chunk_fill_out_the_first_week() are currently
+# only used in WeeklyRepeat, so maybe move them in there.
 def _first_weekday(weekday, d):
     """
     Given a weekday and a date, will increment the date until it's
@@ -357,33 +359,6 @@ def _chunk_fill_out_first_week(year, month, count, event, diff):
     return count
 
 
-def _handle_single_chunk(year, month, count, event):
-    """
-    This handles either a non-repeating event chunk, or the first
-    month of a repeating event chunk.
-    """
-    if not event.starts_same_month_as(month) and not event.repeats('NEVER'):
-        # we don't want repeating chunk events if we're not in it's start month
-        return count
-
-    r = Repeater(
-        count, year, month, day=event.l_start_date.day,
-        end_repeat=event.end_repeat, event=event, count_first=True,
-        end_on=event.l_end_date.day, num=1
-    )
-
-    if event.starts_same_month_as(month):
-        if not event.ends_same_month_as(month):
-            # The chunk event starts this month, but does NOT end this month
-            r.end_on = None
-    else:
-        # event chunks can be maximum of 7 days, so if an event chunk
-        # didn't start this month, we know it will end this month.
-        r.day = 1
-    r.repeat()
-    return r.count
-
-
 class CountHandler(object):
     def __init__(self, year, month, events):
         self.year = year
@@ -391,11 +366,43 @@ class CountHandler(object):
         self.events = events
         self.count = defaultdict(list)
 
+    def _handle_single_chunk(self, event):
+        """
+        This handles either a non-repeating event chunk, or the first
+        month of a repeating event chunk.
+        """
+        if not event.starts_same_month_as(self.month) and not \
+                event.repeats('NEVER'):
+            # no repeating chunk events if we're not in it's start month
+            return
+
+        # add the events into an empty defaultdict. This is better than passing
+        # in self.count, which we don't want to make another copy of because it
+        # could be very large.
+        mycount = defaultdict(list)
+        r = Repeater(
+            mycount, self.year, self.month, day=event.l_start_date.day,
+            end_repeat=event.end_repeat, event=event, count_first=True,
+            end_on=event.l_end_date.day, num=1
+        )
+
+        if event.starts_same_month_as(self.month):
+            if not event.ends_same_month_as(self.month):
+                # The chunk event starts this month,
+                # but does NOT end this month
+                r.end_on = None
+        else:
+            # event chunks can be maximum of 7 days, so if an event chunk
+            # didn't start this month, we know it will end this month.
+            r.day = 1
+        r.repeat()
+        # now we add in the events we generated to self.count
+        for k, v in r.count.items():
+            self.count[k].extend(v)
+
     def _handle_month_event(self, event):
         if event.is_chunk():
-            self.count = _handle_single_chunk(
-                self.year, self.month, self.count, event
-            )
+            self._handle_single_chunk(event)
         elif event.repeats('WEEKDAY'):
             if event.l_start_date.weekday() not in (5, 6):
                 self.count[event.l_start_date.day].append(
@@ -411,12 +418,12 @@ class CountHandler(object):
             if event.starts_ends_yr_mo(self.year, self.month):
                 self._handle_month_event(event)
             if event.repeats('WEEKLY') or event.repeats('BIWEEKLY'):
-                r = Weekly_Repeater(**kwargs)
+                r = WeeklyRepeater(**kwargs)
             elif event.repeats('MONTHLY'):
-                r = Monthly_Repeater(**kwargs)
+                r = MonthlyRepeater(**kwargs)
             elif event.repeats('DAILY') or event.repeats('WEEKDAY'):
-                r = Daily_Repeater(**kwargs)
+                r = DailyRepeater(**kwargs)
             else:
-                r = Yearly_Repeater(**kwargs)
+                r = YearlyRepeater(**kwargs)
             self.count = r.repeat_it()
         return self.count

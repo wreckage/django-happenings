@@ -138,6 +138,8 @@ class EventDayView(GenericEventView):
         if error:
             context['cal_error'] = error
 
+        # Note that we don't prefetch 'cancellations' because they will be
+        # prefetched later (in day_display in displays.py)
         all_month_events = Event.objects.all_month_events(
             year, month, self.category, self.tag
         )

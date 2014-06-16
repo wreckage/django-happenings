@@ -46,7 +46,7 @@ class TestHandlers(SetMeUp):
             description="Testing 1 2 3",
             repeat="WEEKDAY",
         )
-        c = h.Daily_Repeater(
+        c = h.DailyRepeater(
             self.counter, self.year, self.month, day, end_repeat, event,
             count_first=True
         ).repeat_it()

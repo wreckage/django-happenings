@@ -11,7 +11,7 @@ def get_next_event(event, now):
     Returns the next occurrence of a given event, relative to 'now'.
     The 'event' arg should be an iterable containing one element,
     namely the event we'd like to find the occurrence of.
-    The reason for this is b/c handle_count(),
+    The reason for this is b/c the get_count() function of CountHandler,
     which this func makes use of, expects an iterable.
     The 'now' arg should be an instance of either datetime.datetime()
     or datetime.date().
@@ -21,12 +21,6 @@ def get_next_event(event, now):
     day = now.day
     e_day = event[0].l_start_date.day
     e_end_day = event[0].l_end_date.day
-    # If we're in the same month and year as when the event starts, and
-    # we're between its start and end days, we must send the event to
-    # handle_count() as month_events instead of as repeat_events, b/c
-    # month_events have their first week counted, repeat_events don't, which
-    # means we'd end up w/ an empty counter returned if we sent as
-    # repeat_events
     if event[0].starts_same_year_month_as(year, month) and \
             e_day <= now.day <= e_end_day:
         occurrences = CountHandler(year, month, event).get_count()
