@@ -1,3 +1,15 @@
+Version 0.2.1 (June 16, 2014)
+-----------------------------
+
+  * fixed a bug with upcoming events template tag and events that occur same
+      datetime
+  * merged repeat() and month_events() in managers.py into all_month_events()
+  * events now sorted correctly (i.e. earliest 1st) in day view and 
+      mini calendar
+  * Added CountHandler object in handlers.py
+  * Added test to check for proper event ordering
+
+
 Version 0.2 (June 08, 2014)
 ---------------------------
 

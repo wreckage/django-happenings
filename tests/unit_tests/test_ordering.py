@@ -8,7 +8,6 @@ from django.utils.encoding import force_bytes
 from django.test import TestCase
 from django.contrib.auth.models import User
 
-from ..integration_tests.event_factory import SetMeUp
 from happenings.models import Event
 
 
@@ -16,6 +15,9 @@ class EventOrderingTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
             'foo', 'bar@example.com', 'secret'
+        )
+        d0 = make_aware(
+            datetime.datetime(2014, 5, 20, 4), get_default_timezone()
         )
         d1 = make_aware(
             datetime.datetime(2014, 5, 20, 5), get_default_timezone()
@@ -44,15 +46,23 @@ class EventOrderingTest(TestCase):
             description="Amazing next event",
             repeat="NEVER",
         )
+        self.event3 = Event.objects.create(
+            start_date=d0,
+            end_date=d1,
+            all_day=True,
+            created_by=self.user,
+            title="uhh event",
+            description="Cool",
+            repeat="NEVER",
+        )
 
-    def assertContentBefore(self, response, text1, text2, failing_msg=None):
+    def assertContentBefore(self, response, text1, text2):
         """
         Testing utility asserting that text1 appears before text2 in response
         content. Modified from:
         https://github.com/django/django/blob/master/tests/admin_views/tests.py
         """
-        if failing_msg is None:
-            failing_msg="%s not found before %s" % (text1, text2)
+        failing_msg = "%s not found before %s" % (text1, text2)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(
             response.content.index(force_bytes(text1)) <
@@ -63,10 +73,21 @@ class EventOrderingTest(TestCase):
         response = self.client.get(reverse(
             'calendar:list', kwargs={'year': '2014', 'month': '5'}
         ))
-        self.assertContentBefore(response, self.event1.title, self.event2.title)
+        self.assertContentBefore(
+            response, self.event3.title, self.event1.title
+        )
+        self.assertContentBefore(
+            response, self.event1.title, self.event2.title
+        )
 
     def test_ordering_day_view(self):
         response = self.client.get(reverse(
-            'calendar:day_list', kwargs={'year': '2014', 'month': '5', 'day': '20'}
+            'calendar:day_list',
+            kwargs={'year': '2014', 'month': '5', 'day': '20'}
         ))
-        self.assertContentBefore(response, self.event1.title, self.event2.title)
+        self.assertContentBefore(
+            response, self.event3.title, self.event1.title
+        )
+        self.assertContentBefore(
+            response, self.event1.title, self.event2.title
+        )
