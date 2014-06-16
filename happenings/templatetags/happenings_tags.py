@@ -26,10 +26,15 @@ def show_calendar(req, mini=False):
     year = now.year
     month = now.month + net
     year, month, error = clean_year_month(year, month, None)
+
+    prefetch = {'loc': True, 'cncl': True}
+    if mini:
+        prefetch['loc'] = False  # locations aren't displayed on mini calendar
+
     all_month_events = list(Event.objects.all_month_events(
-        year, month, category, tag, loc=True, cncl=True
+        year, month, category, tag, **prefetch
     ))
-    all_month_events.sort(key=lambda x: x.start_date)
+    all_month_events.sort(key=lambda x: x.l_start_date.hour)
     qs = req.META['QUERY_STRING']
     if qs:  # get any querystrings that are not next/prev
         qs = get_qs(qs)
