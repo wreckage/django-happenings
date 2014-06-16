@@ -82,8 +82,10 @@ def day_display(year, month, all_month_events, day):
     """
     # Get a dict with all of the events for the month
     count = CountHandler(year, month, all_month_events).get_count()
-    # Create a set consisting of the pks of only those events that
-    # occur on the given day
-    pks = [x[1] for x in count[day]]
-    return Event.objects.filter(pk__in=pks).order_by(
-        'start_date').prefetch_related('cancellations')
+    pks = [x[1] for x in count[day]]  # list of pks for events on given day
+    # List enables sorting.
+    # See the comments in EventMonthView in views.py for more info
+    day_events = list(Event.objects.filter(pk__in=pks).order_by(
+        'start_date').prefetch_related('cancellations'))
+    day_events.sort(key=lambda x: x.l_start_date.hour)
+    return day_events

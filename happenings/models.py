@@ -114,7 +114,7 @@ class Event(models.Model):
         return self.l_start_date.month == self.l_end_date.month
 
     def starts_ends_yr_mo(self, year, month):
-        yr =  self.l_start_date.year == year or self.l_end_date.year == year
+        yr = self.l_start_date.year == year or self.l_end_date.year == year
         mo = self.l_start_date.month == month or self.l_end_date.month == month
         return yr and mo
 
@@ -141,7 +141,7 @@ class Event(models.Model):
     def will_occur(self, now):
         """Returns True if the event will occur again after 'now'."""
         return self.end_repeat is None or self.end_repeat >= now.date() or \
-                self.l_start_date >= now or self.l_end_date >= now
+            self.l_start_date >= now or self.l_end_date >= now
 
     def __str__(self):
         return self.title

@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 from datetime import date, timedelta
 from calendar import month_name
-from itertools import chain
 
 from django.views.generic import ListView, DetailView
 from django.conf import settings
@@ -97,9 +96,11 @@ class EventMonthView(GenericEventView):
 
         # List enables sorting. As far as I can tell, .order_by() can't be used
         # here because we need it ordered by l_start_date.hour (simply ordering
-        # by start_date won't work)
+        # by start_date won't work). The only alternative I've found is to use
+        # extra(), but this would likely require different statements for
+        # different databases...
         all_month_events = list(Event.objects.all_month_events(
-                year, month, self.category, self.tag, loc=True, cncl=True
+            year, month, self.category, self.tag, loc=True, cncl=True
         ))
 
         all_month_events.sort(key=lambda x: x.l_start_date.hour)
