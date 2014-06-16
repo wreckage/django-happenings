@@ -125,7 +125,9 @@ to display a calendar like the one in ``/calendar/``, or like this::
 
 to display a mini calendar. The ``<div>`` shown allows you to use the styles
 included with the app, but you can omit or change them if you want to use 
-your own style. Note also that the request object needs to be included in the tag.
+your own style. Note also that, because the request object needs to be 
+included in the tag, you must include "django.core.context_processors.request"
+in TEMPLATE_CONTEXT_PROCESSORS in your settings.py.
 
 Include ``upcoming_events`` in your template like this::
 
