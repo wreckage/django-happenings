@@ -12,6 +12,7 @@ from happenings.utils.displays import month_display, day_display
 from happenings.utils.next_event import get_next_event
 from happenings.utils.mixins import JSONResponseMixin
 from happenings.utils import common as c
+from happenings.utils.handlers import CountHandler
 
 
 class GenericEventView(JSONResponseMixin, ListView):
@@ -223,4 +224,36 @@ class EventDetailView(DetailView):
                 # let template know if this single-day, non-repeating event is
                 # cancelled
                 context['this_cncl'] = self.check_cncl(e.l_start_date.date())
+        return context
+
+
+class AgendaView(GenericEventView):
+    template_name = 'happenings/agenda.html'
+
+    def __init__(self, *args, **kwargs):
+        super(AgendaView, self).__init__(*args, **kwargs)
+        self.three_mo_events = []
+        self.months = []
+
+    def get_events_and_months(self, start):
+        d = date(start.year, start.month, 1)
+        for i in range(3):
+            if i > 0:
+                month, year = c.inc_month(d.month, d.year)
+                d = date(year, month, 1)
+            print(d.year, d.month)
+            self.months.append(d)
+            count = ''
+            month_events = Event.objects.all_month_events(
+                d.year, d.month, cncl=True
+            )
+            if len(month_events):
+                count = CountHandler(d.year, d.month, month_events).get_count()
+            self.three_mo_events.append(dict(count))
+
+    def get_context_data(self, **kwargs):
+        context = super(AgendaView, self).get_context_data(**kwargs)
+        self.get_events_and_months(c.now)
+        context['events'] = self.three_mo_events
+        context['months'] = self.months
         return context
