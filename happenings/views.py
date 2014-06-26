@@ -241,7 +241,6 @@ class AgendaView(GenericEventView):
             if i > 0:
                 month, year = c.inc_month(d.month, d.year)
                 d = date(year, month, 1)
-            print(d.year, d.month)
             self.months.append(d)
             count = ''
             month_events = Event.objects.all_month_events(
@@ -249,7 +248,9 @@ class AgendaView(GenericEventView):
             )
             if len(month_events):
                 count = CountHandler(d.year, d.month, month_events).get_count()
-            self.three_mo_events.append(dict(count))
+                self.three_mo_events.append(dict(count))
+            else:
+                self.three_mo_events.append(count)
 
     def get_context_data(self, **kwargs):
         context = super(AgendaView, self).get_context_data(**kwargs)
