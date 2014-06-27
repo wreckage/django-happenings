@@ -25,23 +25,6 @@ class GenericEventView(JSONResponseMixin, ListView):
             context, **kwargs
         )
 
-    def get_context_data(self, **kwargs):
-        context = super(GenericEventView, self).get_context_data(**kwargs)
-
-        self.net, self.category, self.tag = c.get_net_category_tag(
-            self.request
-        )
-
-        if self.category is not None:
-            context['cal_category'] = self.category
-        if self.tag is not None:
-            context['cal_tag'] = self.tag
-        return context
-
-
-class EventMonthView(GenericEventView):
-    template_name = 'happenings/event_month_list.html'
-
     def get_year_and_month(self, net, qs, **kwargs):
         """
         Get the year and month. First tries from kwargs, then from
@@ -68,6 +51,23 @@ class EventMonthView(GenericEventView):
         # return the year and month, and any errors that may have occurred do
         # to an invalid month/year being given.
         return c.clean_year_month(year, month, month_orig)
+
+    def get_context_data(self, **kwargs):
+        context = super(GenericEventView, self).get_context_data(**kwargs)
+
+        self.net, self.category, self.tag = c.get_net_category_tag(
+            self.request
+        )
+
+        if self.category is not None:
+            context['cal_category'] = self.category
+        if self.tag is not None:
+            context['cal_tag'] = self.tag
+        return context
+
+
+class EventMonthView(GenericEventView):
+    template_name = 'happenings/event_month_list.html'
 
     def get_context_data(self, **kwargs):
         context = super(EventMonthView, self).get_context_data(**kwargs)
@@ -235,8 +235,8 @@ class AgendaView(GenericEventView):
         self.three_mo_events = []
         self.months = []
 
-    def get_events_and_months(self, start):
-        d = date(start.year, start.month, 1)
+    def set_events_and_months(self, start):
+        d = prev = date(start.year, start.month, 1)
         for i in range(3):
             if i > 0:
                 month, year = c.inc_month(d.month, d.year)
@@ -251,10 +251,18 @@ class AgendaView(GenericEventView):
                 self.three_mo_events.append(dict(count))
             else:
                 self.three_mo_events.append(count)
+        month, year = c.inc_month(d.month, d.year)
+        self.months.append(date(year, month, 1))  # used for 'next' link
+        prev = date(*c.dec_month(prev.year, prev.month, num=3), day=1)
+        self.months.append(prev)  # used for 'prev' link
 
     def get_context_data(self, **kwargs):
         context = super(AgendaView, self).get_context_data(**kwargs)
-        self.get_events_and_months(c.now)
+        qs = self.request.META['QUERY_STRING']
+        if self.net:
+            self.net = (self.net * 3)
+        year, month, error = self.get_year_and_month(self.net, qs)
+        self.set_events_and_months(date(year, month, 1))
         context['events'] = self.three_mo_events
         context['months'] = self.months
         return context

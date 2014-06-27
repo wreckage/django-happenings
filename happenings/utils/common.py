@@ -22,6 +22,21 @@ def inc_month(month, year):
     return month, year
 
 
+def dec_month(year, month, num=1):
+    """
+    Decrement the month and, if neccessary, the year by whatever is
+    specified by 'num' (Must be less than 12).
+    Both month and year should be ints.
+    """
+    if num > 12:
+        return year, month
+    month -= num
+    if month < 1:
+        month = 12
+        year -= 1
+    return year, month
+
+
 def _inc_day(year, month, day, net):
     """Increments the day by converting to a datetime.date()."""
     d = date(year, month, day)

@@ -7,6 +7,7 @@ from . import views
 urlpatterns = patterns('',
     url(r'^$', views.EventMonthView.as_view(), name='list'),
     url(r'^agenda/$', views.AgendaView.as_view(), name='agenda'),
+    url(r'^agenda/(?P<year>\d{4})/(?P<month>\d{2}|\d{1})/$', views.AgendaView.as_view(), name='agenda_date'),
     url(r'^month/shift/$', views.EventMonthView.as_view(), name='month_shift'),
     url(r'^event-list/shift/$', views.EventMonthView.as_view(), name='event_list_shift'),
     url(r'^cal-and-list/shift/$', views.EventMonthView.as_view(), name='cal_and_list_shift'),

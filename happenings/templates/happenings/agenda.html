@@ -2,6 +2,17 @@
 {% load staticfiles happenings_tags %}
 {% block content %}
 <h1>Agenda</h1>
+<p>
+    {% with months|last as next %}
+    <a href="{% url "calendar:agenda_date" next.year next.month %}">
+        prev
+    </a>
+    {% endwith %}
+    <a href="{% url "calendar:agenda_date" months.3.year months.3.month %}">
+        | next
+    </a>
+</a>
+</p>
 
 {% for d in events %}
 
