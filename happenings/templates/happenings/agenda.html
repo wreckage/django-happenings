@@ -5,7 +5,7 @@
 
 {% for d in events %}
 
-        <h3>Events for <span id="agenda-mo-yr">
+    <h3>Events for <span id="agenda-mo-yr">
         {% if forloop.first %}
             {{ months.0|date:"F, Y" }}
         {% elif forloop.last %}
@@ -13,10 +13,25 @@
         {% else  %}
             {{ months.1|date:"F, Y" }}
         {% endif %}
-        </span></h3>
+    </span></h3>
 
     {% for k, v in d.items %}
-        <span id="agenda-day">{{ k }}</span><br>
+
+        {% comment %} 
+            Here we use the custom filter to_datetime to create a 
+            datetime using the day (variable k) and the month and 
+            year from months (which contains datetime.date()s. 
+            This is done so that we can format it using Django's 
+            built-in date filter and display the weekday of the event.
+        {% endcomment %}
+        {% if forloop.parentloop.first %}
+            {{ k|to_datetime:months.0|date:"l, F d" }}
+        {% elif forloop.parentloop.last %}
+            {{ k|to_datetime:months.2|date:"l, F d" }}
+        {% elif not forloop.parentloop.first or forloop.parentloop.last %}
+            {{ k|to_datetime:months.1|date:"l, F d" }}
+        {% endif %}
+        <br>
             <ul>
                 {% for t, pk in v %}
                     <li><a href="/calendar/event/{{ pk }}">{{ t }}</a></li>

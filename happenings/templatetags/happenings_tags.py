@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import heapq
+import datetime
 
 from django.template import Library
 from django.conf import settings
@@ -54,3 +55,12 @@ def upcoming_events(now=timezone.localtime(timezone.now()), finish=90, num=5):
         key=lambda x: x[0]
     )
     return {'upcoming_events': upcoming}
+
+
+@register.filter
+def to_datetime(day, date):
+    """
+    Filter - Creates a new datetime using the month and year from 'date'
+    and the day from 'day'
+    """
+    return datetime.datetime(date.year, date.month, day)
