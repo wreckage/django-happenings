@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from datetime import date, timedelta
 from calendar import month_name
+from collections import defaultdict
 
 from django.views.generic import ListView, DetailView
 from django.conf import settings
@@ -234,6 +235,18 @@ class AgendaView(GenericEventView):
         super(AgendaView, self).__init__(*args, **kwargs)
         self.three_mo_events = []
         self.months = []
+        self.cncl_dates = []
+
+    def generate_cncl(self, month_events, year, month):
+        """
+        Generates a defaultdict that looks like {pk: [date_of_cancellation]}
+        """
+        dates = defaultdict(list)
+        for event in month_events:
+            for cn in event.cancellations.all():
+                if cn.date.month == month and cn.date.year == year:
+                    dates[event.pk].append(cn.date)
+        self.cncl_dates.append(dates) if dates else self.cncl_dates.append('')
 
     def set_events_and_months(self, start):
         d = prev = date(start.year, start.month, 1)
@@ -242,15 +255,15 @@ class AgendaView(GenericEventView):
                 month, year = c.inc_month(d.month, d.year)
                 d = date(year, month, 1)
             self.months.append(d)
-            count = ''
             month_events = Event.objects.all_month_events(
                 d.year, d.month, cncl=True
             )
             if len(month_events):
                 count = CountHandler(d.year, d.month, month_events).get_count()
+                self.generate_cncl(month_events, d.year, d.month)
                 self.three_mo_events.append(dict(count))
             else:
-                self.three_mo_events.append(count)
+                self.three_mo_events.append('')
         month, year = c.inc_month(d.month, d.year)
         self.months.append(date(year, month, 1))  # used for 'next' link
         prev = date(*c.dec_month(prev.year, prev.month, num=3), day=1)
@@ -265,4 +278,5 @@ class AgendaView(GenericEventView):
         self.set_events_and_months(date(year, month, 1))
         context['events'] = self.three_mo_events
         context['months'] = self.months
+        context['cncl_dates'] = self.cncl_dates
         return context

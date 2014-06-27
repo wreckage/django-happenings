@@ -32,7 +32,7 @@ def dec_month(year, month, num=1):
         return year, month
     month -= num
     if month < 1:
-        month = 12
+        month += 12
         year -= 1
     return year, month
 

@@ -1,33 +1,43 @@
 {% extends 'happenings/middle.html' %}
 {% load staticfiles happenings_tags %}
+{% comment %}
+
+    Quick rundown of the custom filters used in this template:
+
+    return_item(l, i): Returns item at position i in l.
+
+    to_datetime(day, date): Creates a new datetime using the 
+        month and year from 'date' and the day from 'day'
+
+    stl(l): Returns 2nd to last item in list l
+
+{% endcomment %}
+
 {% block content %}
 <h1>Agenda</h1>
 <p>
-    {% with months|last as next %}
-    <a href="{% url "calendar:agenda_date" next.year next.month %}">
+    {% with months|last as p %}
+    <a href="{% url "calendar:agenda_date" p.year p.month %}">
         prev
+    </a> | 
+    {% endwith %}
+    {% with months|stl as n %}
+    <a href="{% url "calendar:agenda_date" n.year n.month %}">
+        next
     </a>
     {% endwith %}
-    <a href="{% url "calendar:agenda_date" months.3.year months.3.month %}">
-        | next
-    </a>
 </a>
 </p>
 
-{% for d in events %}
+{% for event_list in events %}
+{% with count=forloop.counter0 %}
+{% with cncl=cncl_dates|return_item:count d=months|return_item:count %}
 
     <h3>Events for <span id="agenda-mo-yr">
-        {% if forloop.first %}
-            {{ months.0|date:"F, Y" }}
-        {% elif forloop.last %}
-            {{ months.2|date:"F, Y" }}
-        {% else  %}
-            {{ months.1|date:"F, Y" }}
-        {% endif %}
+        {{ d|date:"F, Y" }}
     </span></h3>
 
-    {% for k, v in d.items %}
-
+    {% for day, title_and_pk in event_list.items %}
         {% comment %} 
             Here we use the custom filter to_datetime to create a 
             datetime using the day (variable k) and the month and 
@@ -35,20 +45,21 @@
             This is done so that we can format it using Django's 
             built-in date filter and display the weekday of the event.
         {% endcomment %}
-        {% if forloop.parentloop.first %}
-            {{ k|to_datetime:months.0|date:"l, F d" }}
-        {% elif forloop.parentloop.last %}
-            {{ k|to_datetime:months.2|date:"l, F d" }}
-        {% elif not forloop.parentloop.first or forloop.parentloop.last %}
-            {{ k|to_datetime:months.1|date:"l, F d" }}
-        {% endif %}
+            {{ day|to_datetime:d|date:"l, F d" }}
         <br>
             <ul>
-                {% for t, pk in v %}
-                    <li><a href="/calendar/event/{{ pk }}">{{ t }}</a></li>
+                {% for title, pk in title_and_pk %}
+                    <li><a href="/calendar/event/{{ pk }}">
+                        {{ title }}
+                        {% for cn in cncl|return_item:pk %}
+                            {% if cn.day == day %} (CANCELLED){% endif %}
+                        {% endfor %}
+                    </a></li>
                 {% endfor %}
             </ul>
     {% endfor %}
     <br>
+{% endwith %}
+{% endwith %}
 {% endfor %}
 {% endblock content %}

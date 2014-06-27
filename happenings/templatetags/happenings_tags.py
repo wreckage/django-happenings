@@ -64,3 +64,21 @@ def to_datetime(day, date):
     and the day from 'day'
     """
     return datetime.datetime(date.year, date.month, day)
+
+
+@register.filter
+def return_item(l, i):
+    """
+    Filter - Returns item at position i in l.
+    See: http://stackoverflow.com/a/13376792
+    """
+    try:
+        return l[i]
+    except Exception:
+        return None
+
+
+@register.filter
+def stl(l):
+    """Filter - Returns 2nd to last item in list l"""
+    return l[-2]
