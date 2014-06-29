@@ -28,6 +28,7 @@
     {% endwith %}
 </a>
 </p>
+<p><b>Today is {% now "DATE_FORMAT" %}</b></p>
 
 {% for event_list in events %}
 {% with count=forloop.counter0 %}
@@ -36,6 +37,10 @@
     <h3>Events for <span id="agenda-mo-yr">
         {{ d|date:"F, Y" }}
     </span></h3>
+
+    {% if not event_list %}
+        <p>No events scheduled for {{ d|date:"F" }}.</p>
+    {% endif %} 
 
     {% for day, title_and_pk in event_list.items %}
         {% comment %} 
