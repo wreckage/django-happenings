@@ -239,7 +239,8 @@ class AgendaView(GenericEventView):
 
     def generate_cncl(self, month_events, year, month):
         """
-        Generates a defaultdict that looks like {pk: [date_of_cancellation]}
+        Generates a defaultdict that looks like {pk: [date_of_cancellation]}.
+        Used within the template to check for cancelled events.
         """
         dates = defaultdict(list)
         for event in month_events:
