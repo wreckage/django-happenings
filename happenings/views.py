@@ -14,6 +14,14 @@ from happenings.utils.mixins import JSONResponseMixin
 from happenings.utils import common as c
 
 
+CALENDAR_LOCALE = getattr(settings, 'CALENDAR_LOCALE', 'en_US.utf8')
+
+if CALENDAR_LOCALE.replace('-', '').lower().endswith('utf8'):
+    should_decode = True
+else:
+    should_decode = False
+
+
 class GenericEventView(JSONResponseMixin, ListView):
     model = Event
 
@@ -87,8 +95,13 @@ class EventMonthView(GenericEventView):
         )
         context['current'] = current
 
-        context['month_and_year'] = "%(month)s, %(year)d" % (
-            {'month': month_name[month], 'year': year}
+        display_month = month_name[month]
+
+        if should_decode and isinstance(display_month, str):
+            display_month = display_month.decode('utf-8')
+
+        context['month_and_year'] = u"%(month)s, %(year)d" % (
+            {'month': display_month, 'year': year}
         )
 
         if error:  # send any year/month errors
