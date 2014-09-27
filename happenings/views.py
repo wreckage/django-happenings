@@ -169,7 +169,7 @@ class EventDayView(GenericEventView):
         context['month_num'] = month
         context['year'] = year
         context['day'] = day
-        context['month_day_year'] = "%(month)s %(day)d, %(year)d" % (
+        context['month_day_year'] = u"%(month)s %(day)d, %(year)d" % (
             {'month': month_name[month], 'day': day, 'year': year}
         )
 
