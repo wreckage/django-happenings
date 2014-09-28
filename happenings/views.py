@@ -165,12 +165,16 @@ class EventDayView(GenericEventView):
         self.check_for_cancelled_events(d=date(year, month, day))
         context['events'] = self.events
 
-        context['month'] = month_name[month]
+        display_month = month_name[month]
+        if should_decode and isinstance(display_month, str):
+            display_month = display_month.decode('utf-8')
+
+        context['month'] = display_month
         context['month_num'] = month
         context['year'] = year
         context['day'] = day
         context['month_day_year'] = u"%(month)s %(day)d, %(year)d" % (
-            {'month': month_name[month], 'day': day, 'year': year}
+            {'month': display_month, 'day': day, 'year': year}
         )
 
         # for use in the template to build next & prev querystrings
