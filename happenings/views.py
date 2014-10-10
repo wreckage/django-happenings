@@ -76,6 +76,9 @@ class EventMonthView(GenericEventView):
         # to an invalid month/year being given.
         return c.clean_year_month(year, month, month_orig)
 
+    def get_month_events(self, *args, **kwargs):
+        return Event.objects.all_month_events(*args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super(EventMonthView, self).get_context_data(**kwargs)
 
@@ -112,7 +115,7 @@ class EventMonthView(GenericEventView):
         # by start_date won't work). The only alternative I've found is to use
         # extra(), but this would likely require different statements for
         # different databases...
-        all_month_events = list(Event.objects.all_month_events(
+        all_month_events = list(self.get_month_events(
             year, month, self.category, self.tag, loc=True, cncl=True
         ))
 
@@ -142,6 +145,9 @@ class EventDayView(GenericEventView):
                 if cn.date == d:
                     event.title += ' (CANCELLED)'
 
+    def get_month_events(self, *args, **kwargs):
+        return Event.objects.all_month_events(*args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super(EventDayView, self).get_context_data(**kwargs)
 
@@ -154,7 +160,7 @@ class EventDayView(GenericEventView):
 
         # Note that we don't prefetch 'cancellations' because they will be
         # prefetched later (in day_display in displays.py)
-        all_month_events = Event.objects.all_month_events(
+        all_month_events = self.get_month_events(
             year, month, self.category, self.tag
         )
 
