@@ -29,7 +29,7 @@ class EventManager(models.Manager):
             get_default_timezone()
         )
         ym_last = make_aware(
-            datetime.datetime(year, month, monthrange(year, month)[1]),
+            datetime.datetime(year, month, monthrange(year, month)[1], 23, 59, 59, 1000000-1),
             get_default_timezone()
         )
         return ym_first, ym_last
