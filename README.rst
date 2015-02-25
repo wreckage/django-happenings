@@ -175,7 +175,7 @@ locale pack installed for your system. Example of changing the language to Germa
 
 Default time format is "%I:%M%p" but it can be changed with next setting::
 
-	TIME_FORMAT = '%H:%M'
+	CALENDAR_TIME_FORMAT = '%H:%M'
 
 Tests
 -------------
