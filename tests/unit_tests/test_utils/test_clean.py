@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 from django.test import TestCase
 from django.utils import timezone
 
+now = timezone.localtime(timezone.now())
+
 from happenings.utils.common import clean_year_month_day, clean_year_month
 
 ERROR = "The date given was invalid."
@@ -61,7 +63,7 @@ class CleanYearMonthTest(TestCase):
         """Test that a next or prev qs that puts the year out of bounds
         returns an error."""
         year, month, error = clean_year_month(2014, 100000, 1)
-        self.assertEqual(year, 2014)
+        self.assertEqual(year, now.year)
         self.assertEqual(month, timezone.localtime(timezone.now()).month)
         self.assertEqual(error, ERROR)
 
