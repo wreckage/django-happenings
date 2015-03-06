@@ -31,6 +31,10 @@ class GenericCalendar(LocaleHTMLCalendar):
         if len(args) < 2:
             args = args + (CALENDAR_LOCALE, )
         super(GenericCalendar, self).__init__(*args)
+        if self.locale.find('.') > 0:
+            self.encoding = self.locale.split('.')[1]
+        else:
+            self.encoding = None
         self.yr = year
         self.mo = month
         self.count = count  # defaultdict in {date:[title1, title2,]} format
@@ -74,8 +78,8 @@ class GenericCalendar(LocaleHTMLCalendar):
         """
         display_month = month_name[themonth]
 
-        if isinstance(display_month, six.binary_type):
-            display_month = display_month.decode(sys.getdefaultencoding())
+        if isinstance(display_month, six.binary_type) and self.encoding:
+            display_month = display_month.decode(self.encoding)
 
         if withyear:
             s = u'%s %s' % (display_month, theyear)
@@ -92,7 +96,7 @@ class EventCalendar(GenericCalendar):
         # when
         display_month = month_name[self.mo]
 
-        if isinstance(display_month, six.binary_type):
+        if isinstance(display_month, six.binary_type) and self.encoding:
             display_month = display_month.decode('utf-8')
 
         self.when = ('<p><b>When:</b> ' + display_month + ' ' +
