@@ -1,21 +1,23 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+# python lib:
 from calendar import LocaleHTMLCalendar, month_name
 from datetime import date
+import sys
 
+# django:
 from django.conf import settings
 
+# thirdparties:
+import six
+
+# happenings:
 from .common import now
 
 URL = getattr(settings, "CALENDAR_URL", 'calendar')
 
 CALENDAR_LOCALE = getattr(settings, 'CALENDAR_LOCALE', 'en_US.utf8')
-
-if CALENDAR_LOCALE.replace('-', '').lower().endswith('utf8'):
-    should_decode = True
-else:
-    should_decode = False
-
 
 CALENDAR_HOUR_FORMAT = CALENDAR_TIME_FORMAT = getattr(settings, 'CALENDAR_TIME_FORMAT', "%I:%M%p")
 
@@ -26,6 +28,8 @@ if '%p' in CALENDAR_TIME_FORMAT:
 
 class GenericCalendar(LocaleHTMLCalendar):
     def __init__(self, year, month, count, all_month_events, *args):
+        if len(args) < 2:
+            args = args + (CALENDAR_LOCALE, )
         super(GenericCalendar, self).__init__(*args)
         self.yr = year
         self.mo = month
@@ -70,8 +74,8 @@ class GenericCalendar(LocaleHTMLCalendar):
         """
         display_month = month_name[themonth]
 
-        if should_decode and isinstance(display_month, str):
-            display_month = display_month.decode('utf-8')
+        if isinstance(display_month, six.binary_type):
+            display_month = display_month.decode(sys.getdefaultencoding())
 
         if withyear:
             s = u'%s %s' % (display_month, theyear)
@@ -88,7 +92,7 @@ class EventCalendar(GenericCalendar):
         # when
         display_month = month_name[self.mo]
 
-        if should_decode and isinstance(display_month, str):
+        if isinstance(display_month, six.binary_type):
             display_month = display_month.decode('utf-8')
 
         self.when = ('<p><b>When:</b> ' + display_month + ' ' +

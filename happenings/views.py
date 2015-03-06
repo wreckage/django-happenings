@@ -1,12 +1,19 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+# python lib:
 from datetime import date, timedelta
 from calendar import month_name
 
+# django:
 from django.views.generic import ListView, DetailView
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 
+# thirdparties:
+import six
+
+# happenings:
 from .models import Event
 from happenings.utils.displays import month_display, day_display
 from happenings.utils.next_event import get_next_event
@@ -15,11 +22,6 @@ from happenings.utils import common as c
 
 
 CALENDAR_LOCALE = getattr(settings, 'CALENDAR_LOCALE', 'en_US.utf8')
-
-if CALENDAR_LOCALE.replace('-', '').lower().endswith('utf8'):
-    should_decode = True
-else:
-    should_decode = False
 
 
 class GenericEventView(JSONResponseMixin, ListView):
@@ -100,7 +102,7 @@ class EventMonthView(GenericEventView):
 
         display_month = month_name[month]
 
-        if should_decode and isinstance(display_month, str):
+        if isinstance(display_month, six.binary_type):
             display_month = display_month.decode('utf-8')
 
         context['month_and_year'] = u"%(month)s, %(year)d" % (
@@ -172,7 +174,7 @@ class EventDayView(GenericEventView):
         context['events'] = self.events
 
         display_month = month_name[month]
-        if should_decode and isinstance(display_month, str):
+        if isinstance(display_month, six.binary_type):
             display_month = display_month.decode('utf-8')
 
         context['month'] = display_month

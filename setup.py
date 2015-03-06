@@ -35,5 +35,6 @@ setup(
     install_requires=[
         'django >= 1.6, < 1.8',
         'pytz',
+        'six >= 1.9, <  2.0',
     ],
 )
