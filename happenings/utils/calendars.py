@@ -31,7 +31,10 @@ class GenericCalendar(LocaleHTMLCalendar):
         if len(args) < 2:
             args = args + (CALENDAR_LOCALE, )
         super(GenericCalendar, self).__init__(*args)
-        if self.locale.find('.') > 0:
+        if isinstance(self.locale, tuple):
+            if len(self.locale) == 2:
+                self.encoding = self.locale[1]
+        elif self.locale.find('.') > 0:
             self.encoding = self.locale.split('.')[1]
         else:
             self.encoding = None
