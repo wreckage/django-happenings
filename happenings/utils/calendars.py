@@ -1,18 +1,43 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+# python lib:
 from calendar import LocaleHTMLCalendar, month_name
 from datetime import date
+import sys
 
+# django:
 from django.conf import settings
 
+# thirdparties:
+import six
+
+# happenings:
 from .common import now
 
 URL = getattr(settings, "CALENDAR_URL", 'calendar')
 
+CALENDAR_LOCALE = getattr(settings, 'CALENDAR_LOCALE', 'en_US.utf8')
+
+CALENDAR_HOUR_FORMAT = CALENDAR_TIME_FORMAT = getattr(settings, 'CALENDAR_TIME_FORMAT', "%I:%M%p")
+
+
+if '%p' in CALENDAR_TIME_FORMAT:
+    CALENDAR_HOUR_FORMAT = CALENDAR_TIME_FORMAT.replace('%M', '')
+
 
 class GenericCalendar(LocaleHTMLCalendar):
     def __init__(self, year, month, count, all_month_events, *args):
+        if len(args) < 2:
+            args = args + (CALENDAR_LOCALE, )
         super(GenericCalendar, self).__init__(*args)
+        if isinstance(self.locale, tuple):
+            if len(self.locale) == 2:
+                self.encoding = self.locale[1]
+        elif self.locale.find('.') > 0:
+            self.encoding = self.locale.split('.')[1]
+        else:
+            self.encoding = None
         self.yr = year
         self.mo = month
         self.count = count  # defaultdict in {date:[title1, title2,]} format
@@ -54,10 +79,15 @@ class GenericCalendar(LocaleHTMLCalendar):
         Change colspan to "5", add "today" button, and return a month
         name as a table row.
         """
+        display_month = month_name[themonth]
+
+        if isinstance(display_month, six.binary_type) and self.encoding:
+            display_month = display_month.decode(self.encoding)
+
         if withyear:
-            s = '%s %s' % (month_name[themonth], theyear)
+            s = u'%s %s' % (display_month, theyear)
         else:
-            s = '%s' % month_name[themonth]
+            s = u'%s' % display_month
         return ('<tr><th colspan="5" class="month">'
                 '<button id="cal-today-btn" class="btn btn-small">'
                 'Today</button> %s</th></tr>' % s)
@@ -67,10 +97,15 @@ class EventCalendar(GenericCalendar):
     def popover_helper(self):
         """Returns variables used to build popovers."""
         # when
-        self.when = ('<p><b>When:</b> ' + month_name[self.mo] + ' ' +
+        display_month = month_name[self.mo]
+
+        if isinstance(display_month, six.binary_type) and self.encoding:
+            display_month = display_month.decode('utf-8')
+
+        self.when = ('<p><b>When:</b> ' + display_month + ' ' +
                      str(self.day) + ', ' + self.event.l_start_date.strftime(
-                         "%I:%M%p").lstrip('0') + ' - ' +
-                     self.event.l_end_date.strftime("%I:%M%p").lstrip('0') +
+                         CALENDAR_TIME_FORMAT).lstrip('0') + ' - ' +
+                     self.event.l_end_date.strftime(CALENDAR_TIME_FORMAT).lstrip('0') +
                      '</p>')
 
         if self.event.location.count():  # where
@@ -87,7 +122,7 @@ class EventCalendar(GenericCalendar):
                       else '</p>')
 
         self.event_url = self.event.get_absolute_url()  # url
-        t = "%I:%M%p" if self.event.l_start_date.minute else "%I%p"
+        t = CALENDAR_TIME_FORMAT if self.event.l_start_date.minute else CALENDAR_HOUR_FORMAT
         self.title2 = (self.event.l_start_date.strftime(t).lstrip('0') +
                        ' ' + self.title)
 
@@ -156,7 +191,7 @@ class MiniEventCalendar(GenericCalendar):
             for event in self.events:
                 if event.pk == pk:
                     self.event = event
-                    t = "%I:%M%p" if event.l_start_date.minute else "%I%p"
+                    t = CALENDAR_TIME_FORMAT if event.l_start_date.minute else CALENDAR_HOUR_FORMAT
                     self.title = event.l_start_date.strftime(t).lstrip('0') + \
                         ' - ' + event.title
                     self.check_if_cancelled()

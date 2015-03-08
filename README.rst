@@ -23,11 +23,11 @@ Coming soon:
 * ++ more
 
 
-Note about upgrading from previous versions: Upgrading your version of the app 
-is a good idea, but be aware that some updates to the app involve changes 
-to models, which may cause problems with your database. For this reason 
-I've included south migrations to help make upgrading easier. But you 
-should always be cautious and make sure to backup your database before 
+Note about upgrading from previous versions: Upgrading your version of the app
+is a good idea, but be aware that some updates to the app involve changes
+to models, which may cause problems with your database. For this reason
+I've included south migrations to help make upgrading easier. But you
+should always be cautious and make sure to backup your database before
 upgrading. To see a list of changes made for each version view the CHANGELOG.
 
 Dependencies
@@ -49,6 +49,16 @@ jQuery is used for AJAX and the 'Today' button on the calendar.
 
 TWBS is used to create popovers when an event is clicked on the calendar.
 
+.. warning::
+
+   django-happenings now use Django migrations by default. South users have to adjust their settings:
+
+   .. code-block:: python
+
+	SOUTH_MIGRATION_MODULES = {
+	    'taggit': 'taggit.south_migrations',
+	}
+
 Quick Install
 -------------
 
@@ -62,7 +72,7 @@ Quick Install
 
   INSTALLED_APPS = (
     ...
-    'happenings'
+    'happenings',
   )
 
 3. Include the ``django-happenings`` URLconf in urls.py:
@@ -73,8 +83,8 @@ Quick Install
 
 4. Make sure your ``TIME_ZONE`` is set correctly in settings.py.
 
-5. Run ``python manage.py syncdb`` to create the models (replace ``syncdb`` with 
-   ``migrate happenings`` if using South). If you're running MySQL, be sure that
+5. Run ``python manage.py migrate`` to create the models (replace ``migrate`` with
+   ``syncdb happenings`` if using older Django without South). If you're running MySQL, be sure that
    your database is properly configured to use time zones.
 
 6. Run the development server and go to ``127.0.0.1:8000/admin/`` to create and manage events.
@@ -85,7 +95,7 @@ Customizing
 -------------
 
 The quickest way to begin customizing the app is to override the
-``middle.html`` template by creating your own version in 
+``middle.html`` template by creating your own version in
 <mytemplates>/happenings/middle.html (replace <mytemplates> with wherever
 you keep your templates) and add the line ``{% extends 'base.html' %}``
 (replace base.html with your base template). For a greater degree of customization,
@@ -93,7 +103,7 @@ you can copy and paste into your project all of the templates included in the ap
 change them to fit your needs.
 
 Be sure to include the packaged css & javascript into your base template if you
-want to use them. Loading the default style into your template would 
+want to use them. Loading the default style into your template would
 look something like (assuming staticfiles has been loaded)::
 
     <link href=" {% static 'happenings/css/calendar.css' %}" rel="stylesheet">
@@ -124,8 +134,8 @@ to display a calendar like the one in ``/calendar/``, or like this::
     </div>
 
 to display a mini calendar. The ``<div>`` shown allows you to use the styles
-included with the app, but you can omit or change them if you want to use 
-your own style. Note also that, because the request object needs to be 
+included with the app, but you can omit or change them if you want to use
+your own style. Note also that, because the request object needs to be
 included in the tag, you must include "django.core.context_processors.request"
 in TEMPLATE_CONTEXT_PROCESSORS in your settings.py.
 
@@ -138,9 +148,9 @@ If you'd like to show events that occur outside of 90 days, or show more events 
 list, use the ``finish`` and ``num`` options::
 
     {% upcoming_events finish=365 num=8 %}
-    
+
 Optional Settings
--------------
+-----------------
 
 You can specify different settings for the app in your settings.py file.
 
@@ -161,6 +171,11 @@ in the Django settings. Also note that to use ``CALENDAR_LOCALE`` you'll need to
 locale pack installed for your system. Example of changing the language to German::
 
     CALENDAR_LOCALE = 'de_DE.utf8'
+
+
+Default time format is "%I:%M%p" but it can be changed with next setting::
+
+	CALENDAR_TIME_FORMAT = '%H:%M'
 
 Tests
 -------------

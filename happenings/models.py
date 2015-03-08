@@ -45,7 +45,7 @@ class Event(models.Model):
 
     start_date = models.DateTimeField(verbose_name=_("start date"))
     end_date = models.DateTimeField(_("end date"))
-    all_day = models.BooleanField(_("all day"))
+    all_day = models.BooleanField(_("all day"), default=False)
     repeat = models.CharField(
         _("repeat"), max_length=15, choices=REPEAT_CHOICES, default='NEVER'
     )

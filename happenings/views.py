@@ -1,17 +1,27 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+# python lib:
 from datetime import date, timedelta
 from calendar import month_name
 
+# django:
 from django.views.generic import ListView, DetailView
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 
+# thirdparties:
+import six
+
+# happenings:
 from .models import Event
 from happenings.utils.displays import month_display, day_display
 from happenings.utils.next_event import get_next_event
 from happenings.utils.mixins import JSONResponseMixin
 from happenings.utils import common as c
+
+
+CALENDAR_LOCALE = getattr(settings, 'CALENDAR_LOCALE', 'en_US.utf8')
 
 
 class GenericEventView(JSONResponseMixin, ListView):
@@ -68,6 +78,9 @@ class EventMonthView(GenericEventView):
         # to an invalid month/year being given.
         return c.clean_year_month(year, month, month_orig)
 
+    def get_month_events(self, *args, **kwargs):
+        return Event.objects.all_month_events(*args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super(EventMonthView, self).get_context_data(**kwargs)
 
@@ -87,8 +100,13 @@ class EventMonthView(GenericEventView):
         )
         context['current'] = current
 
-        context['month_and_year'] = "%(month)s, %(year)d" % (
-            {'month': month_name[month], 'year': year}
+        display_month = month_name[month]
+
+        if isinstance(display_month, six.binary_type):
+            display_month = display_month.decode('utf-8')
+
+        context['month_and_year'] = u"%(month)s, %(year)d" % (
+            {'month': display_month, 'year': year}
         )
 
         if error:  # send any year/month errors
@@ -99,7 +117,7 @@ class EventMonthView(GenericEventView):
         # by start_date won't work). The only alternative I've found is to use
         # extra(), but this would likely require different statements for
         # different databases...
-        all_month_events = list(Event.objects.all_month_events(
+        all_month_events = list(self.get_month_events(
             year, month, self.category, self.tag, loc=True, cncl=True
         ))
 
@@ -129,6 +147,9 @@ class EventDayView(GenericEventView):
                 if cn.date == d:
                     event.title += ' (CANCELLED)'
 
+    def get_month_events(self, *args, **kwargs):
+        return Event.objects.all_month_events(*args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super(EventDayView, self).get_context_data(**kwargs)
 
@@ -141,7 +162,7 @@ class EventDayView(GenericEventView):
 
         # Note that we don't prefetch 'cancellations' because they will be
         # prefetched later (in day_display in displays.py)
-        all_month_events = Event.objects.all_month_events(
+        all_month_events = self.get_month_events(
             year, month, self.category, self.tag
         )
 
@@ -152,12 +173,16 @@ class EventDayView(GenericEventView):
         self.check_for_cancelled_events(d=date(year, month, day))
         context['events'] = self.events
 
-        context['month'] = month_name[month]
+        display_month = month_name[month]
+        if isinstance(display_month, six.binary_type):
+            display_month = display_month.decode('utf-8')
+
+        context['month'] = display_month
         context['month_num'] = month
         context['year'] = year
         context['day'] = day
-        context['month_day_year'] = "%(month)s %(day)d, %(year)d" % (
-            {'month': month_name[month], 'day': day, 'year': year}
+        context['month_day_year'] = u"%(month)s %(day)d, %(year)d" % (
+            {'month': display_month, 'day': day, 'year': year}
         )
 
         # for use in the template to build next & prev querystrings

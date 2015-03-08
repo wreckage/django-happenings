@@ -33,7 +33,8 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
     install_requires=[
-        'django >= 1.6, < 1.7',
+        'django >= 1.6, < 1.8',
         'pytz',
+        'six >= 1.9, <  2.0',
     ],
 )
