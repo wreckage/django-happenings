@@ -50,3 +50,20 @@ class ChunkEventListViewTest(SetMeUp):
 
         valid_dates = {'03': [28, 29, 30, 31], '04': [1, 2]}
         self.check_dates(event, valid_dates)
+
+    def test_list_view_with_chunk_starts_ends_different_month2(self):
+        """
+        This tests that the issue opened on github by
+        Joe Tennies (github.com/Rotund) has been resolved
+        thanks to the work of Yaroslav Klyuyev (github.com/imposeren)
+        """
+        event = create_event(
+            start_date=(2014, 7, 31),
+            end_date=(2014, 8, 1),
+            created_by=self.user,
+            title="Cool",
+            description="'chunk' event that lasts 2 days and doesn't repeat.",
+        )
+
+        valid_dates = {'07': [31], '08': [1]}
+        self.check_dates(event, valid_dates)
