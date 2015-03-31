@@ -1,3 +1,22 @@
+Version 0.2.3 (March 30, 2015)
+-----------------------------
+
+  * Yaroslav Klyuyev <github.com/imposeren> contibuted the following:
+      * added Django 1.7 support
+      * added CALENDAR_TIME_FORMAT optional setting
+      * added get_month_events method
+      * README changes
+      * fixed several places that caused UnicodeDecodeError
+      * fixed a bug involving events flowing over months
+      * fixed some tests
+      * + more? (sorry if I missed something)
+  * added a test for Yaroslav's 'events flowing over months' bug fix
+  * Tox can now run tests again Django 1.7
+  * Travis CI now tests against Django 1.7
+  * fixed a bug involving out-of-range days
+  * added AUTHORS file
+
+
 Version 0.2.1 (June 16, 2014)
 -----------------------------
 
