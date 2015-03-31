@@ -86,7 +86,7 @@ class CleanYearMonthDayTest(TestCase):
 
     def test_invalid_day(self):
         year, month, day, error = clean_year_month_day(2014, 3, 32, 0)
-        self.assertEqual(day, timezone.localtime(timezone.now()).day)
+        self.assertEqual(day, 1)
         self.assertEqual(error, ERROR)
 
     def test_invalid_month(self):
@@ -97,19 +97,19 @@ class CleanYearMonthDayTest(TestCase):
     def test_invalid_day_and_month(self):
         year, month, day, error = clean_year_month_day(2014, 30, 35, 0)
         self.assertEqual(month, timezone.localtime(timezone.now()).month)
-        self.assertEqual(day, timezone.localtime(timezone.now()).day)
+        self.assertEqual(day, 1)
         self.assertEqual(error, ERROR)
 
     def test_invalid_day_and_month_with_net(self):
         year, month, day, error = clean_year_month_day(2014, 30, 35, 1)
         self.assertEqual(month, timezone.localtime(timezone.now()).month)
-        self.assertEqual(day, timezone.localtime(timezone.now()).day)
+        self.assertEqual(day, 1)
         self.assertEqual(error, ERROR)
 
     def test_invalid_day_month_and_year(self):
         year, month, day, error = clean_year_month_day(2044, 30, 35, 1)
         self.assertEqual(month, timezone.localtime(timezone.now()).month)
-        self.assertEqual(day, timezone.localtime(timezone.now()).day)
+        self.assertEqual(day, 1)
         self.assertEqual(error, ERROR)
 
     def test_invalid_year(self):

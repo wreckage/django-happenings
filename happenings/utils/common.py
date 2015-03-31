@@ -125,7 +125,7 @@ def clean_year_month_day(year, month, day, net):
         error = error_msg
     # check that the day is within range for the month
     if day not in xrange(1, monthrange(year, month)[1] + 1):
-        day = now.day
+        day = 1
         error = error_msg
     # if no error yet, increment the day by net then check the year
     if not error:
