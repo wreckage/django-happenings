@@ -16,3 +16,7 @@ install:
 script:
   - tox -e $TOX_ENV
 
+matrix:
+  exclude:
+   - python: "2.6"
+     env: TOX_ENV=django17
