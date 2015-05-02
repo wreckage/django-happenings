@@ -8,6 +8,7 @@ python:
 env:
   - TOX_ENV=django16
   - TOX_ENV=django17
+  - TOX_ENV=django18
   - TOX_ENV=coverage
 
 install:
@@ -20,3 +21,5 @@ matrix:
   exclude:
    - python: "2.6"
      env: TOX_ENV=django17
+   - python: "2.6"
+     env: TOX_ENV=django18
