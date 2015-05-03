@@ -14,6 +14,7 @@ from happenings.models import Event
 class SetMeUp(TestCase):
     @classmethod
     def setUpClass(cls):
+        super(SetMeUp, cls).setUpClass()
         cls.user = User.objects.create_user(
             'foo', 'bar@example.com', 'secret'
         )
