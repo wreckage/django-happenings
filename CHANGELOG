@@ -1,3 +1,10 @@
+Version 0.2.4 (May 03, 2015)
+-----------------------------
+
+  * Tomek Główka <github.com/tttomekkk> added a django18 test environment,
+    adjusted some tests, and cleared the way for Django 1.8 support.
+
+
 Version 0.2.3 (March 30, 2015)
 -----------------------------
 
