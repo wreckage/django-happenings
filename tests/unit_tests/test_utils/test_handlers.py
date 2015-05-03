@@ -5,11 +5,13 @@ from __future__ import unicode_literals
 
 from collections import defaultdict
 from datetime import date
+from django.test.utils import override_settings
 
 from happenings.utils import handlers as h
 from tests.integration_tests.event_factory import create_event, SetMeUp
 
 
+@override_settings(TIME_ZONE='UTC')
 class TestHandlers(SetMeUp):
     """Tests the handlers for repeating events."""
     def setUp(self):
@@ -28,6 +30,7 @@ class TestHandlers(SetMeUp):
             title="event",
             description="Testing 1 2 3",
             repeat="WEEKDAY",
+            utc=True
         )
         c = h.Repeater(
             self.counter, self.year, self.month, day, end_repeat, event
@@ -45,6 +48,7 @@ class TestHandlers(SetMeUp):
             title="event",
             description="Testing 1 2 3",
             repeat="WEEKDAY",
+            utc=True
         )
         c = h.DailyRepeater(
             self.counter, self.year, self.month, day, end_repeat, event,
@@ -57,7 +61,7 @@ class TestHandlers(SetMeUp):
 
     def test_chunk_fill_out_first_week_stops_on_end_repeat(self):
         event = create_event(
-            start_date=(2014, 5, 1),
+            start_date=(2014, 4, 30),
             end_date=(2014, 5, 4),
             created_by=self.user,
             title="event",
@@ -86,6 +90,7 @@ class TestHandlers(SetMeUp):
             title="event",
             description="Testing 1 2 3",
             repeat="WEEKDAY",
+            utc=True
         )
         c = h.Repeater(
             self.counter, self.year, self.month,
