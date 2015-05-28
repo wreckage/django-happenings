@@ -114,12 +114,17 @@ class UpcomingEvents(object):
             num -= 1
 
     def _weekday(self):
-        if self.event.l_start_date > self.now:
-            start = self.event.l_start_date
-        else:
-            start = self.now
+        start = self.event.l_start_date
+        if not self.event.l_start_date > self.now:
+            start = start.replace(
+                year=self.now.year, month=self.now.month, day=self.now.day
+            )
         while start.weekday() > 4:
             start += timedelta(days=1)
+        if start < self.now:
+            start += timedelta(days=1)
+            while start.weekday() > 4:
+                start += timedelta(days=1)
         for i in xrange(self.num):
             # change to date() so we can compare to event.end_repeat
             start_ = date(start.year, start.month, start.day)
@@ -140,7 +145,7 @@ class UpcomingEvents(object):
         else:
             start = self.event.l_start_date
             end = self.event.l_end_date
-            while end <= self.now:
+            while start < self.now or end <= self.now:
                 start += timedelta(days=repeat[self.event.repeat])
                 end += timedelta(days=repeat[self.event.repeat])
         for i in xrange(self.num):
