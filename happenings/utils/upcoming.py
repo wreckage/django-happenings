@@ -87,19 +87,19 @@ class UpcomingEvents(object):
 
     def _monthly(self):
         num = self.num
+        start = self.event.l_start_date
         year = self.now.year
         month = self.now.month
+        day = self.event.l_start_date.day
         if self.event.l_start_date > self.now:  # event starts in the future
             year = self.event.l_start_date.year
             month = self.event.l_start_date.month
-        elif self.now.day > self.event.l_start_date.day:  # event has passed
-            month, year = inc_month(month, year)
-        day = self.event.l_start_date.day
         while num:
             try:
-                start = make_aware(
-                    datetime(year, month, day), get_default_timezone()
-                )
+                start = start.replace(year=year, month=month)
+                if self.now > start:  # if event already happened
+                    month, year = inc_month(month, year)
+                    continue
                 # change to date() so we can compare to event.end_repeat
                 start_ = date(year, month, day)
             # value error most likely means that the event's start date doesn't
@@ -121,10 +121,16 @@ class UpcomingEvents(object):
             )
         while start.weekday() > 4:
             start += timedelta(days=1)
+        # print(start > self.now)
+        # print(start)
+        # print(self.now)
+        # print(self.finish)
+        # print(self.event.title)
         if start < self.now:
             start += timedelta(days=1)
             while start.weekday() > 4:
                 start += timedelta(days=1)
+        # print(start)
         for i in xrange(self.num):
             # change to date() so we can compare to event.end_repeat
             start_ = date(start.year, start.month, start.day)
@@ -148,6 +154,15 @@ class UpcomingEvents(object):
             while start < self.now or end <= self.now:
                 start += timedelta(days=repeat[self.event.repeat])
                 end += timedelta(days=repeat[self.event.repeat])
+        # print("---------------------")
+        # print(start > self.now)
+        # print(start)
+        # print(end)
+        # print(self.event.is_chunk())
+        # print(self.now)
+        # print(self.finish)
+        # print(self.event.title)
+        # print("---------------------")
         for i in xrange(self.num):
             # change to date() so we can compare to event.end_repeat
             start_ = date(start.year, start.month, start.day)
