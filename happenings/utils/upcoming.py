@@ -63,7 +63,11 @@ class UpcomingEvents(object):
             year += 1
         # The event occurs this month, so check the day to see if passed
         elif self.now.month == self.event.l_start_date.month:
-            if self.now.day > self.event.l_start_date.day:  # already occurred
+            # if the current day is > event day, or if the event was today but
+            # finished, increment the year.
+            if self.now.day > self.event.l_start_date.day or \
+                self.now.day == self.event.l_start_date.day and \
+                    self.now.time() > self.event.l_start_date.time():
                 year += 1
         month = self.event.l_start_date.month
         day = self.event.l_start_date.day
@@ -121,16 +125,10 @@ class UpcomingEvents(object):
             )
         while start.weekday() > 4:
             start += timedelta(days=1)
-        # print(start > self.now)
-        # print(start)
-        # print(self.now)
-        # print(self.finish)
-        # print(self.event.title)
         if start < self.now:
             start += timedelta(days=1)
             while start.weekday() > 4:
                 start += timedelta(days=1)
-        # print(start)
         for i in xrange(self.num):
             # change to date() so we can compare to event.end_repeat
             start_ = date(start.year, start.month, start.day)
@@ -154,15 +152,6 @@ class UpcomingEvents(object):
             while start < self.now or end <= self.now:
                 start += timedelta(days=repeat[self.event.repeat])
                 end += timedelta(days=repeat[self.event.repeat])
-        # print("---------------------")
-        # print(start > self.now)
-        # print(start)
-        # print(end)
-        # print(self.event.is_chunk())
-        # print(self.now)
-        # print(self.finish)
-        # print(self.event.title)
-        # print("---------------------")
         for i in xrange(self.num):
             # change to date() so we can compare to event.end_repeat
             start_ = date(start.year, start.month, start.day)
