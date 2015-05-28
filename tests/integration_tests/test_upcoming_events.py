@@ -590,6 +590,29 @@ class UpcomingEventsTest(SetMeUp):
         events = self.upcoming_events(event, d, fin)
         self.assertEqual(len(events), 0)
 
+    def test_events_over_for_day_daily(self):
+        """
+        Tests that an event that is over for the day doesn't show up,
+        but that an even not over for the day, does.
+        """
+        event = create_event(
+            start_date=(2015, 5, 1, 21),
+            end_date=(2015, 5, 1, 22),
+            created_by=self.user,
+            title="Leon",
+            description="Testing 1 2 3",
+            repeat="DAILY",
+            end_repeat=date(2015, 8, 10),
+            utc=True
+        )
+        d = make_aware(datetime(2015, 5, 6, 20), utc)
+        fin = d.replace(hour=23, minute=59, second=59, microsecond=999)
+        events = self.upcoming_events(event, d, fin)
+        self.assertEqual(len(events), 1)
+        d = make_aware(datetime(2015, 5, 6, 23), utc)
+        events = self.upcoming_events(event, d, fin)
+        self.assertEqual(len(events), 0)
+
     def test_multiday_event_weekly_repeat(self):
         """
         Tests that a multiday event (hitherto called an event 'chunk') doesn't

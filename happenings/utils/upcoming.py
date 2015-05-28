@@ -144,6 +144,10 @@ class UpcomingEvents(object):
         if self.event.repeats('DAILY'):
             if self.event.l_start_date > self.now:
                 start = self.event.l_start_date
+            elif self.event.l_start_date.time() < self.now.time():
+                # has it already begun? Then no longer upcoming, so ++day
+                start = self.now
+                start += timedelta(days=1)
             else:
                 start = self.now
         else:
