@@ -13,14 +13,15 @@ def get_next_event(event, now):
     namely the event we'd like to find the occurrence of.
     The reason for this is b/c the get_count() function of CountHandler,
     which this func makes use of, expects an iterable.
-    The 'now' arg should be an instance of either datetime.datetime()
-    or datetime.date().
+    CHANGED: The 'now' arg must be an instance of datetime.datetime()
+    to allow time comparison (used to accept datetime.date() as well)
     """
     year = now.year
     month = now.month
     day = now.day
     e_day = event[0].l_start_date.day
     e_end_day = event[0].l_end_date.day
+    good_today = True if event[0].l_start_date.time() >= now.time() else False
     if event[0].starts_same_year_month_as(year, month) and \
             e_day <= now.day <= e_end_day:
         occurrences = CountHandler(year, month, event).get_count()
@@ -40,6 +41,8 @@ def get_next_event(event, now):
             occurrences = CountHandler(year, month, event).get_count()
             future_dates = [x for x in occurrences if x >= now.day]
             e_end_month = event[0].l_end_date.month
+            if future_dates and future_dates[0] is day and not good_today:
+                future_dates.pop(0)
             while not future_dates:
                 month, year = inc_month(month, year)
                 if event[0].repeats('YEARLY') and \

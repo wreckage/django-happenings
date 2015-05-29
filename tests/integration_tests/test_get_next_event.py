@@ -20,11 +20,11 @@ class NextEventTest(SetMeUp):
         )
         event = Event.objects.all()
 
-        date = datetime.date(2014, 3, 5)
+        date = datetime.datetime(2014, 3, 5)
         y, m, d = get_next_event(event, date)
         self.assertEqual((y, m, d), (2014, 3, 8))
 
-        date = datetime.date(2014, 4, 9)
+        date = datetime.datetime(2014, 4, 9)
         y, m, d = get_next_event(event, date)
         self.assertEqual((y, m, d), (2014, 4, 12))
 
@@ -39,7 +39,7 @@ class NextEventTest(SetMeUp):
         )
         event = Event.objects.all()
 
-        date = datetime.date(2014, 3, 1)
+        date = datetime.datetime(2014, 3, 1)
         y, m, d = get_next_event(event, date)
         self.assertEqual((y, m, d), (2014, 3, 1))
 
@@ -54,11 +54,11 @@ class NextEventTest(SetMeUp):
         )
         event = Event.objects.all()
 
-        date = datetime.date(2014, 3, 1)
+        date = datetime.datetime(2014, 3, 1)
         y, m, d = get_next_event(event, date)
         self.assertEqual((y, m, d), (2014, 3, 1))
 
-        date = datetime.date(2014, 5, 5)
+        date = datetime.datetime(2014, 5, 5)
         y, m, d = get_next_event(event, date)
         self.assertEqual((y, m, d), (2014, 5, 28))
 
@@ -75,10 +75,10 @@ class NextEventTest(SetMeUp):
         # use date_dicts, and put the for loop into its own func (like i did
         # with check_dates)
         # date_dicts = [
-        #    {datetime.date(2014, 2, 19): (2014, 2, 22)},
-        #    {datetime.date(2014, 3, 13): (2014, 3, 15)},
-        #    {datetime.date(2014, 4, 5): (2014, 4, 5)},
-        #    {datetime.date(2015, 4, 5): (2015, 4, 5)}
+        #    {datetime.datetime(2014, 2, 19): (2014, 2, 22)},
+        #    {datetime.datetime(2014, 3, 13): (2014, 3, 15)},
+        #    {datetime.datetime(2014, 4, 5): (2014, 4, 5)},
+        #    {datetime.datetime(2015, 4, 5): (2015, 4, 5)}
         # ]
 
         # for date_dict in date_dicts:
@@ -87,19 +87,19 @@ class NextEventTest(SetMeUp):
         #        y, m, d = get_next_event(event, z)
         #        self.assertEqual((y, m, d), x)
 
-        date = datetime.date(2014, 2, 19)
+        date = datetime.datetime(2014, 2, 19)
         y, m, d = get_next_event(event, date)
         self.assertEqual((y, m, d), (2014, 2, 22))
 
-        date = datetime.date(2014, 3, 13)
+        date = datetime.datetime(2014, 3, 13)
         y, m, d = get_next_event(event, date)
         self.assertEqual((y, m, d), (2014, 3, 15))
 
-        date = datetime.date(2014, 4, 5)
+        date = datetime.datetime(2014, 4, 5)
         y, m, d = get_next_event(event, date)
         self.assertEqual((y, m, d), (2014, 4, 5))
 
-        date = datetime.date(2015, 4, 5)
+        date = datetime.datetime(2015, 4, 5)
         y, m, d = get_next_event(event, date)
         self.assertEqual((y, m, d), (2015, 4, 5))
 
@@ -114,15 +114,15 @@ class NextEventTest(SetMeUp):
         )
         event = Event.objects.all()
 
-        date = datetime.date(2014, 3, 13)
+        date = datetime.datetime(2014, 3, 13)
         y, m, d = get_next_event(event, date)
         self.assertEqual((y, m, d), (2014, 3, 15))
 
-        date = datetime.date(2014, 4, 12)
+        date = datetime.datetime(2014, 4, 12)
         y, m, d = get_next_event(event, date)
         self.assertEqual((y, m, d), (2014, 4, 12))
 
-        date = datetime.date(2014, 3, 1)
+        date = datetime.datetime(2014, 3, 1)
         y, m, d = get_next_event(event, date)
         self.assertEqual((y, m, d), (2014, 3, 1))
 
@@ -146,7 +146,7 @@ class NextEventTest(SetMeUp):
             [(2014, 2, 2), (2014, 4, 1)],
         ]
         for item in dates:
-            now = datetime.date(*item[0])
+            now = datetime.datetime(*item[0])
             y, m, d = get_next_event(event, now)
             self.assertEqual((y, m, d), item[1])
 
@@ -169,7 +169,7 @@ class NextEventTest(SetMeUp):
             [(2017, 5, 5), (2017, 5, 5)],
         ]
         for item in dates:
-            now = datetime.date(*item[0])
+            now = datetime.datetime(*item[0])
             y, m, d = get_next_event(event, now)
             self.assertEqual((y, m, d), item[1])
 
@@ -184,7 +184,7 @@ class NextEventTest(SetMeUp):
         )
         event = Event.objects.all()
 
-        date = datetime.date(2014, 5, 7)
+        date = datetime.datetime(2014, 5, 7)
         y, m, d = get_next_event(event, date)
         self.assertEqual((y, m, d), (2014, 6, 2))
 
@@ -202,7 +202,7 @@ class NextEventTest(SetMeUp):
             repeat="WEEKLY",
         )
         event = Event.objects.all()
-        date = datetime.date(2014, 5, 29)
+        date = datetime.datetime(2014, 5, 29)
         y, m, d = get_next_event(event, date)
         self.assertEqual((y, m, d), (2014, 6, 2))
 
@@ -220,6 +220,50 @@ class NextEventTest(SetMeUp):
             repeat="YEARLY",
         )
         event = Event.objects.all()
-        date = datetime.date(2014, 6, 6)
+        date = datetime.datetime(2014, 6, 6)
         y, m, d = get_next_event(event, date)
         self.assertEqual((y, m, d), (2015, 3, 15))
+
+    def test_next_event_over_same_day(self):
+        """Test that an event over for the day doesn't show up."""
+        create_event(
+            start_date=(2015, 5, 1, 10),
+            end_date=(2015, 5, 1, 13),
+            created_by=self.user,
+            title="The Event",
+            description="This is an event. Enjoy.",
+            repeat="WEEKDAY",
+        )
+        event = Event.objects.all()
+
+        date = datetime.datetime(2015, 5, 4, 9)  # before
+        y, m, d = get_next_event(event, date)
+        self.assertEqual((y, m, d), (2015, 5, 4))
+        date = date.replace(hour=12)  # during
+        y, m, d = get_next_event(event, date)
+        self.assertEqual((y, m, d), (2015, 5, 5))
+        date = date.replace(hour=14)  # after
+        y, m, d = get_next_event(event, date)
+        self.assertEqual((y, m, d), (2015, 5, 5))
+
+    def test_next_event_with_time(self):
+        """Test that an event over for the day doesn't show up."""
+        create_event(
+            start_date=(2015, 5, 22, 10),
+            end_date=(2015, 5, 22, 13),
+            created_by=self.user,
+            title="The Event",
+            description="This is an event. Enjoy.",
+            repeat="WEEKLY",
+        )
+        event = Event.objects.all()
+
+        date = datetime.datetime(2015, 5, 28, 9)
+        y, m, d = get_next_event(event, date)
+        self.assertEqual((y, m, d), (2015, 5, 29))
+        date = date.replace(hour=12)
+        y, m, d = get_next_event(event, date)
+        self.assertEqual((y, m, d), (2015, 5, 29))
+        date = date.replace(hour=14)
+        y, m, d = get_next_event(event, date)
+        self.assertEqual((y, m, d), (2015, 5, 29))
