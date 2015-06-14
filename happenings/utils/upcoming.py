@@ -33,9 +33,9 @@ class UpcomingEvents(object):
             now_gt_start = self.now > self.event.l_start_date
             now_gt_end = self.now > self.event.end_date
             if not self.happenings and (now_gt_end or now_gt_start):
-                    has_ended = True
-            elif self.happenings and (now_gt_end and now_lt_start):
-                    has_ended = True
+                has_ended = True
+            elif self.happenings and (now_gt_end or now_lt_start):
+                has_ended = True
             has_not_started = self.event.l_start_date > self.finish
             if has_ended or has_not_started:
                 return self.events
@@ -189,7 +189,7 @@ class UpcomingEvents(object):
             while end <= self.now:
                 start += timedelta(days=repeat[self.event.repeat])
                 end += timedelta(days=repeat[self.event.repeat])
-            now_lt_end = self.now < end
+            now_lt_end = self.now <= end
             now_gt_start = self.now >= start
             if now_gt_start and now_lt_end:
                 self.events.append((start, self.event))
