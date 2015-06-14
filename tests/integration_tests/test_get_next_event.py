@@ -247,7 +247,10 @@ class NextEventTest(SetMeUp):
         self.assertEqual((y, m, d), (2015, 5, 5))
 
     def test_next_event_with_time(self):
-        """Test that an event over for the day doesn't show up."""
+        """
+        Test that an event over for today, but not scheduled to
+        even appear for today, shows up correctly.
+        """
         create_event(
             start_date=(2015, 5, 22, 10),
             end_date=(2015, 5, 22, 13),

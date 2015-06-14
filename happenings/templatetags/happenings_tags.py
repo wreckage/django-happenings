@@ -45,13 +45,32 @@ def show_calendar(req, mini=False):
 
 @register.inclusion_tag('happenings/partials/upcoming_events.html')
 def upcoming_events(now=timezone.localtime(timezone.now()), finish=90, num=5):
-    finish = now + timezone.timedelta(days=finish)
-    finish = finish.replace(hour=23, minute=59, second=59, microsecond=999)
-    all_upcoming = (UpcomingEvents(x, now, finish, num).get_upcoming_events()
-                    for x in Event.objects.live(now))
-    upcoming = heapq.nsmallest(
+    return {
+        'upcoming_events': _get_the_events(now, finish, num, happenings=False)
+    }
+
+
+@register.inclusion_tag('happenings/partials/happening_events.html')
+def happenings(now=timezone.localtime(timezone.now()), finish=0, num=200):
+    return {
+        'upcoming_events': _get_the_events(now, finish, num, happenings=True)
+    }
+
+
+def _get_the_events(now, finish, num, happenings):
+    if finish is not 0:
+        finish = now + timezone.timedelta(days=finish)
+        finish = finish.replace(hour=23, minute=59, second=59, microsecond=999)
+    else:
+        happenings = True
+    all_upcoming = (
+        UpcomingEvents(
+            x, now, finish, num, happenings=happenings
+        ).get_upcoming_events() for x in Event.objects.live(now)
+    )  # list comp
+    the_events = heapq.nsmallest(
         num,
         (item for sublist in all_upcoming for item in sublist),
         key=lambda x: x[0]
     )
-    return {'upcoming_events': upcoming}
+    return the_events
