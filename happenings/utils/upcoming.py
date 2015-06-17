@@ -152,8 +152,10 @@ class UpcomingEvents(object):
 
     def _others(self):
         repeat = {'WEEKLY': 7, 'BIWEEKLY': 14, 'DAILY': 1}
+        # XXX check if self.happenings in get_upcoming_event()
         if self.happenings:
-            self.happening_helper()
+            if self.event.will_occur(self.now):
+                self.happening_helper()
             return
         if self.event.repeats('DAILY'):
             if self.event.l_start_date > self.now:
