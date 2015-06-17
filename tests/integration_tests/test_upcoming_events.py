@@ -908,3 +908,23 @@ class UpcomingEventsTest(SetMeUp):
         d = make_aware(datetime(2015, 6, 17, 21, 59), utc)
         events = self.hap(event, d)
         self.assertEqual(len(events), 0)
+
+    def test_hap_weekday_repeat_future(self):
+        event = create_event(
+            start_date=(2016, 6, 1, 20),
+            end_date=(2016, 6, 1, 22),
+            created_by=self.user,
+            title="Happening",
+            description="Testing 1 2 3",
+            repeat="WEEKDAY",
+            utc=True
+        )
+        d = make_aware(datetime(2015, 6, 1, 21), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 0)
+        d = make_aware(datetime(2015, 6, 1, 20), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 0)
+        d = make_aware(datetime(2015, 6, 1, 21, 59), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 0)

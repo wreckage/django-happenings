@@ -101,6 +101,10 @@ class UpcomingEvents(object):
             num -= 1
 
     def _monthly(self):
+        if self.happenings:
+            if self.event.will_occur(self.now):
+                self.happening_helper()
+            return
         num = self.num
         start = self.event.l_start_date
         year = self.now.year
@@ -187,6 +191,8 @@ class UpcomingEvents(object):
     def happening_helper(self):
         start = self.event.l_start_date
         end = self.event.l_end_date
+        if self.now < start:
+            return
         if self.event.repeats('WEEKDAY'):
             if not self.now.weekday() > 4:  # must be weekday
                 if start.time() <= self.now.time() and \
@@ -196,6 +202,11 @@ class UpcomingEvents(object):
             if start.time() <= self.now.time() and \
                     end.time() >= self.now.time():
                 self.events.append((start, self.event))
+        elif self.event.repeats('MONTHLY'):
+            if start.day == self.now.day:
+                if start.time() <= self.now.time() and \
+                        end.time() >= self.now.time():
+                    self.events.append((start, self.event))
         else:
             repeat = {'WEEKLY': 7, 'BIWEEKLY': 14}
             while end <= self.now:
