@@ -845,3 +845,66 @@ class UpcomingEventsTest(SetMeUp):
         d = make_aware(datetime(2015, 6, 29, 21, 59), utc)
         events = self.hap(event, d)
         self.assertEqual(len(events), 0)
+
+    def test_hap_weekday_repeat(self):
+        event = create_event(
+            start_date=(2015, 6, 1, 20),
+            end_date=(2015, 6, 1, 22),
+            created_by=self.user,
+            title="Happening",
+            description="Testing 1 2 3",
+            repeat="WEEKDAY",
+            end_repeat=date(2015, 6, 16),
+            utc=True
+        )
+        d = make_aware(datetime(2015, 6, 1, 21), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 1)
+        d = make_aware(datetime(2015, 6, 1, 20), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 1)
+        d = make_aware(datetime(2015, 6, 1, 21, 59), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 1)
+
+        d = make_aware(datetime(2015, 6, 7, 21), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 0)
+        d = make_aware(datetime(2015, 6, 7, 20), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 0)
+        d = make_aware(datetime(2015, 6, 7, 21, 59), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 0)
+
+        d = make_aware(datetime(2015, 6, 8, 21), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 1)
+        d = make_aware(datetime(2015, 6, 8, 20), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 1)
+        d = make_aware(datetime(2015, 6, 8, 21, 59), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 1)
+
+        # not happening
+        d = make_aware(datetime(2015, 6, 1, 19), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 0)
+        d = make_aware(datetime(2015, 6, 1, 23), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 0)
+        d = make_aware(datetime(2015, 6, 1, 22, 2), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 0)
+
+        # check that end_repeat is respected
+        d = make_aware(datetime(2015, 6, 17, 21), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 0)
+        d = make_aware(datetime(2015, 6, 17, 20), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 0)
+        d = make_aware(datetime(2015, 6, 17, 21, 59), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 0)
