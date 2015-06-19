@@ -51,10 +51,18 @@ def upcoming_events(now=timezone.localtime(timezone.now()), finish=90, num=5):
 
 
 @register.inclusion_tag('happenings/partials/happening_events.html')
-def happenings(now=timezone.localtime(timezone.now()), finish=0, num=200):
-    return {
-        'upcoming_events': _get_the_events(now, finish, num, happenings=True)
-    }
+def current_happenings(now=timezone.localtime(timezone.now())):
+    temp = now
+    drepl = lambda x: temp.replace(  # replace hr, min, sec, msec of 'now'
+        hour=x.l_start_date.hour,
+        minute=x.l_start_date.minute,
+        second=x.l_start_date.second,
+        microsecond=x.l_start_date.microsecond
+    )
+    the_haps = (
+        (drepl(x), x) for x in Event.objects.live(now) if x.is_happening(now)
+    )
+    return {'upcoming_events': the_haps}
 
 
 def _get_the_events(now, finish, num, happenings):

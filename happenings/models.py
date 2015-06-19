@@ -90,6 +90,34 @@ class Event(models.Model):
         """Localized end date."""
         return timezone.localtime(self.end_date)
 
+    def is_happening(self, now):
+        """Returns True if the event is happening 'now', False if not."""
+        start = self.l_start_date
+        end = self.l_end_date
+        happening = False
+        # check that the event has started and 'now' is btwn start & end:
+        if (now >= start) and (start.time() <= now.time() <= end.time()):
+            if self.repeats('WEEKDAY'):
+                if not now.weekday() > 4:  # must be weekday
+                    happening = True
+            elif self.repeats('DAILY') or self.repeats('NEVER'):
+                    happening = True
+            elif self.repeats('MONTHLY'):
+                if start.day <= now.day <= end.day:
+                    happening = True
+            elif self.repeats('YEARLY'):
+                if (start.month <= now.month <= end.month) and \
+                        (start.day <= now.day <= end.day):
+                    happening = True
+            else:
+                repeat = {'WEEKLY': 7, 'BIWEEKLY': 14}
+                while end <= now:
+                    start += datetime.timedelta(days=repeat[self.repeat])
+                    end += datetime.timedelta(days=repeat[self.repeat])
+                if start <= now <= end:
+                    happening = True
+        return happening
+
     def repeats(self, repeat):
         return self.repeat == repeat
 
