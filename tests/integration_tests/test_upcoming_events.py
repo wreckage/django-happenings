@@ -713,6 +713,8 @@ class UpcomingEventsTest(SetMeUp):
 # tests so I'm putting them here for now
 
     def hap(self, event, d):
+        # need to know the length of the returned generator, so used a little
+        # hack found here: http://stackoverflow.com/a/7223557/3188521
         return sum(1 for _ in haps(now=d)['upcoming_events'])
 
     def test_hap_no_repeat(self):

@@ -11,13 +11,9 @@ from happenings.utils.common import inc_month
 
 
 class UpcomingEvents(object):
-    def __init__(self, event, now, finish, num=5, happenings=False):
+    def __init__(self, event, now, finish, num=5):
         self.event = event
-        self.happenings = happenings
-        if happenings:
-            self.finish = event.l_end_date
-        else:
-            self.finish = finish  # datetime.datetime
+        self.finish = finish  # datetime.datetime
         self.now = now        # datetime.datetime
         self.num = num
         self.events = []
@@ -29,12 +25,9 @@ class UpcomingEvents(object):
         """
         if self.event.repeats('NEVER'):
             has_ended = False
-            now_lt_start = self.now < self.event.l_start_date
             now_gt_start = self.now > self.event.l_start_date
             now_gt_end = self.now > self.event.end_date
-            if not self.happenings and (now_gt_end or now_gt_start):
-                has_ended = True
-            elif self.happenings and (now_gt_end or now_lt_start):
+            if now_gt_end or now_gt_start:
                 has_ended = True
             has_not_started = self.event.l_start_date > self.finish
             if has_ended or has_not_started:
@@ -66,10 +59,6 @@ class UpcomingEvents(object):
             return False
 
     def _yearly(self):
-        if self.happenings:
-            if self.event.will_occur(self.now):
-                self.happening_helper()
-            return
         num = self.num
         year = self.now.year
         if self.event.l_start_date > self.now:  # event starts in the future
@@ -105,10 +94,6 @@ class UpcomingEvents(object):
             num -= 1
 
     def _monthly(self):
-        if self.happenings:
-            if self.event.will_occur(self.now):
-                self.happening_helper()
-            return
         num = self.num
         start = self.event.l_start_date
         year = self.now.year
@@ -137,10 +122,6 @@ class UpcomingEvents(object):
             num -= 1
 
     def _weekday(self):
-        if self.happenings:
-            if self.event.will_occur(self.now):
-                self.happening_helper()
-            return
         start = self.event.l_start_date
         if not self.event.l_start_date > self.now:
             start = start.replace(
@@ -164,11 +145,6 @@ class UpcomingEvents(object):
 
     def _others(self):
         repeat = {'WEEKLY': 7, 'BIWEEKLY': 14, 'DAILY': 1}
-        # XXX check if self.happenings in get_upcoming_event()
-        if self.happenings:
-            if self.event.will_occur(self.now):
-                self.happening_helper()
-            return
         if self.event.repeats('DAILY'):
             if self.event.l_start_date > self.now:
                 start = self.event.l_start_date
@@ -191,33 +167,3 @@ class UpcomingEvents(object):
                 return
             self.events.append((start, self.event))
             start += timedelta(days=repeat[self.event.repeat])
-
-    def happening_helper(self):
-        start = self.event.l_start_date
-        end = self.event.l_end_date
-        # if the event hasn't started yet, or if 'now' is outside
-        # of the event's start & end times, then can't be happening:
-        if (self.now < start) or not \
-                (start.time() <= self.now.time() <= end.time()):
-            return
-        if self.event.repeats('WEEKDAY'):
-            if not self.now.weekday() > 4:  # must be weekday
-                    self.events.append((start, self.event))
-        elif self.event.repeats('DAILY'):
-                self.events.append((start, self.event))
-        elif self.event.repeats('MONTHLY'):
-            if start.day <= self.now.day <= end.day:
-                self.events.append((start, self.event))
-        elif self.event.repeats('YEARLY'):
-            if (start.month <= self.now.month <= end.month) and \
-                    (start.day <= self.now.day <= end.day):
-                self.events.append((start, self.event))
-        else:
-            repeat = {'WEEKLY': 7, 'BIWEEKLY': 14}
-            while end <= self.now:
-                start += timedelta(days=repeat[self.event.repeat])
-                end += timedelta(days=repeat[self.event.repeat])
-            now_lt_end = self.now <= end
-            now_gt_start = self.now >= start
-            if now_gt_start and now_lt_end:
-                self.events.append((start, self.event))
