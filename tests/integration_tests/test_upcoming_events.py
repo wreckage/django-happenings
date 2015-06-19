@@ -991,3 +991,51 @@ class UpcomingEventsTest(SetMeUp):
         d = make_aware(datetime(2014, 6, 2, 21, 59), utc)
         events = self.hap(event, d)
         self.assertEqual(len(events), 0)
+
+    def test_hap_yearly_repeat(self):
+        event = create_event(
+            start_date=(2015, 6, 2, 20),
+            end_date=(2015, 6, 2, 22),
+            created_by=self.user,
+            title="Happening",
+            description="Testing 1 2 3",
+            repeat="YEARLY",
+            end_repeat=date(2017, 8, 1),
+            utc=True
+        )
+        d = make_aware(datetime(2015, 6, 2, 21), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 1)
+        d = make_aware(datetime(2015, 6, 2, 20), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 1)
+        d = make_aware(datetime(2015, 6, 2, 21, 59), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 1)
+
+        d = make_aware(datetime(2015, 6, 3, 21), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 0)
+        d = make_aware(datetime(2015, 6, 3, 20), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 0)
+        d = make_aware(datetime(2015, 6, 3, 21, 59), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 0)
+
+        d = make_aware(datetime(2015, 6, 2, 19), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 0)
+        d = make_aware(datetime(2015, 6, 2, 22, 2), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 0)
+
+        d = make_aware(datetime(2016, 6, 2, 21), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 1)
+        d = make_aware(datetime(2016, 6, 2, 20), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 1)
+        d = make_aware(datetime(2016, 6, 2, 21, 59), utc)
+        events = self.hap(event, d)
+        self.assertEqual(len(events), 1)
