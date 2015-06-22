@@ -2,7 +2,7 @@
 
 <h1>Happening Now</h1>
 <ul class="calendar-list">
-    {% for d, event in upcoming_events %}
+    {% for d, event in events_happening_now %}
         {% with colors=event.get_colors %}
             <li class="month-event" style="background:{{ colors.0 }}; color:{{ colors.1 }};">
                 <div class="date-widget">

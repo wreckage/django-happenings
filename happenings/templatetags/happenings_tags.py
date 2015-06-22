@@ -69,4 +69,4 @@ def current_happenings(now=timezone.localtime(timezone.now())):
     the_haps = (
         (drepl(x), x) for x in Event.objects.live(now) if x.is_happening(now)
     )
-    return {'upcoming_events': the_haps}
+    return {'events_happening_now': the_haps}

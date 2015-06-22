@@ -11,7 +11,7 @@ Features:
 * Repeating and non-repeating events
 * Events that start and end on different days
 * Support for cancelled events
-* Upcoming events list
+* Upcoming events and current happenings lists
 * AJAX support
 * Default CSS & Javascript to help you get started
 
@@ -119,7 +119,8 @@ Template tags are available by loading ``happenings_tags`` into your template::
 
     {% load happenings_tags %}
 
-This gives access to two template tags: ``show_calendar`` and ``upcoming_events``.
+This gives access to three template tags: 
+``show_calendar``, ``upcoming_events``, and ``current_happenings``.
 
 Use ``show_calendar`` like this::
 
@@ -148,6 +149,12 @@ If you'd like to show events that occur outside of 90 days, or show more events 
 list, use the ``finish`` and ``num`` options::
 
     {% upcoming_events finish=365 num=8 %}
+
+Include ``current_happenings`` in your template like this::
+
+    {% current_happenings %}
+
+to display a list of events that are happening now.
 
 Optional Settings
 -----------------
