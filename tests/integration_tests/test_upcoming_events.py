@@ -1041,3 +1041,131 @@ class UpcomingEventsTest(SetMeUp):
         d = make_aware(datetime(2016, 6, 2, 21, 59), utc)
         events = self.hap(event, d)
         self.assertEqual(events, 1)
+
+    def test_hap_yearly_repeat_multi(self):
+        event = create_event(
+            start_date=(2015, 6, 2, 20),
+            end_date=(2015, 6, 4, 22),
+            created_by=self.user,
+            title="Happening",
+            description="Testing 1 2 3",
+            repeat="YEARLY",
+            end_repeat=date(2017, 8, 1),
+            utc=True
+        )
+        for year in (2015, 2016):
+            for day in (2, 3, 4):
+                d = make_aware(datetime(year, 6, day, 21), utc)
+                events = self.hap(event, d)
+                self.assertEqual(events, 1)
+                d = make_aware(datetime(year, 6, day, 20), utc)
+                events = self.hap(event, d)
+                self.assertEqual(events, 1)
+                d = make_aware(datetime(year, 6, day, 21, 59), utc)
+                events = self.hap(event, d)
+                self.assertEqual(events, 1)
+                d = make_aware(datetime(year, 6, day, 19), utc)
+                events = self.hap(event, d)
+                self.assertEqual(events, 0)
+                d = make_aware(datetime(year, 6, day, 22, 2), utc)
+                events = self.hap(event, d)
+                self.assertEqual(events, 0)
+
+        d = make_aware(datetime(2015, 7, 2, 21), utc)
+        events = self.hap(event, d)
+        self.assertEqual(events, 0)
+        d = make_aware(datetime(2015, 5, 2, 20), utc)
+        events = self.hap(event, d)
+        self.assertEqual(events, 0)
+
+    def test_hap_monthly_repeat_multi(self):
+        event = create_event(
+            start_date=(2015, 6, 2, 20),
+            end_date=(2015, 6, 4, 22),
+            created_by=self.user,
+            title="Happening",
+            description="Testing 1 2 3",
+            repeat="MONTHLY",
+            end_repeat=date(2017, 8, 1),
+            utc=True
+        )
+        for month in (6, 7):
+            for day in (2, 3, 4):
+                d = make_aware(datetime(2015, month, day, 21), utc)
+                events = self.hap(event, d)
+                self.assertEqual(events, 1)
+                d = make_aware(datetime(2015, month, day, 20), utc)
+                events = self.hap(event, d)
+                self.assertEqual(events, 1)
+                d = make_aware(datetime(2015, month, day, 21, 59), utc)
+                events = self.hap(event, d)
+                self.assertEqual(events, 1)
+                d = make_aware(datetime(2015, month, day, 19), utc)
+                events = self.hap(event, d)
+                self.assertEqual(events, 0)
+                d = make_aware(datetime(2015, month, day, 22, 2), utc)
+                events = self.hap(event, d)
+                self.assertEqual(events, 0)
+
+    def test_hap_weekly_repeat_multi(self):
+        event = create_event(
+            start_date=(2015, 6, 2, 20),
+            end_date=(2015, 6, 4, 22),
+            created_by=self.user,
+            title="Happening",
+            description="Testing 1 2 3",
+            repeat="WEEKLY",
+            end_repeat=date(2017, 8, 1),
+            utc=True
+        )
+        for day in (2, 3, 4, 9, 10, 11):
+            d = make_aware(datetime(2015, 6, day, 21), utc)
+            events = self.hap(event, d)
+            self.assertEqual(events, 1)
+            d = make_aware(datetime(2015, 6, day, 20), utc)
+            events = self.hap(event, d)
+            self.assertEqual(events, 1)
+            d = make_aware(datetime(2015, 6, day, 21, 59), utc)
+            events = self.hap(event, d)
+            self.assertEqual(events, 1)
+            d = make_aware(datetime(2015, 6, day, 19), utc)
+            events = self.hap(event, d)
+            self.assertEqual(events, 0)
+            d = make_aware(datetime(2015, 6, day, 22, 2), utc)
+            events = self.hap(event, d)
+            self.assertEqual(events, 0)
+
+    def test_hap_no_repeat_multi(self):
+        event = create_event(
+            start_date=(2015, 6, 2, 20),
+            end_date=(2015, 6, 4, 22),
+            created_by=self.user,
+            title="Happening",
+            description="Testing 1 2 3",
+            repeat="NEVER",
+            end_repeat=date(2017, 8, 1),
+            utc=True
+        )
+        for day in (2, 3, 4):
+            d = make_aware(datetime(2015, 6, day, 21), utc)
+            events = self.hap(event, d)
+            self.assertEqual(events, 1)
+            d = make_aware(datetime(2015, 6, day, 20), utc)
+            events = self.hap(event, d)
+            self.assertEqual(events, 1)
+            d = make_aware(datetime(2015, 6, day, 21, 59), utc)
+            events = self.hap(event, d)
+            self.assertEqual(events, 1)
+            d = make_aware(datetime(2015, 6, day, 19), utc)
+            events = self.hap(event, d)
+            self.assertEqual(events, 0)
+            d = make_aware(datetime(2015, 6, day, 22, 2), utc)
+            events = self.hap(event, d)
+            self.assertEqual(events, 0)
+
+        d = make_aware(datetime(2015, 6, 1, 21), utc)
+        events = self.hap(event, d)
+        self.assertEqual(events, 0)
+        d = make_aware(datetime(2015, 6, 5, 21), utc)
+        events = self.hap(event, d)
+        self.assertEqual(events, 0)
