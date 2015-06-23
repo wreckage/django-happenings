@@ -1,3 +1,18 @@
+Version 0.2.5 (June 22, 2015)
+-----------------------------
+
+  * added 'current_happenings' template tag to display events that are
+    happening now.
+  * created a template partial called happening_events.html for the new tag.
+    It resembles upcoming_events.html.
+  * added .is_happening(now) function in models, so that you can call
+    event.is_happening(now) to see if the event is happening 'now' (where
+    'now' is an optional datetime, and by default is right now)
+  * added tests for the new 'current_happenings' tag, but I was getting
+    a strange invocation error when I tried to put the tests into their
+    own file, so I stuck the tests in with upcoming_events tests.
+
+
 Version 0.2.4 (May 03, 2015)
 -----------------------------
 
