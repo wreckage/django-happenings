@@ -9,7 +9,7 @@ from .handlers import CountHandler
 from .calendars import EventCalendar, MiniEventCalendar
 from .common import get_next_and_prev
 
-LOC = str(getattr(settings, "CALENDAR_LOCALE", "en_US.utf8"))
+LOC = str(getattr(settings, "CALENDAR_LOCALE", ""))
 locale.setlocale(locale.LC_ALL, LOC)
 
 
