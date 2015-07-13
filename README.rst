@@ -156,6 +156,24 @@ Include ``current_happenings`` in your template like this::
 
 to display a list of events that are happening now.
 
+Locale
+-----------------
+
+There are no translations from English yet, but if you'd like to display the calendar
+and the event list in a different language, you can use ``CALENDAR_LOCALE``. The upcoming
+events list won't be translated, though. For that you'll need to specify your ``LANGUAGE_CODE``
+in the Django settings. Also note that to use ``CALENDAR_LOCALE`` you'll need to have the correct
+locale pack installed for your system. Example of changing the language to German::
+
+    CALENDAR_LOCALE = 'de_DE.utf8'
+
+Example of changing to U.S. English::
+
+    CALENDAR_LOCALE = 'en_US.utf8'
+
+By default, the system's locale is used, so setting ``CALENDAR_LOCALE`` also ensures that you're 
+using the locale you want.
+
 Optional Settings
 -----------------
 
@@ -170,15 +188,6 @@ Use ``CALENDAR_START_DAY`` to change the day on which the calendar starts. Examp
 of starting the calendar on Sunday (instead of the default of Monday)::
 
     CALENDAR_START_DAY = 6
-
-There are no translations from English yet, but if you'd like to display the calendar
-and the event list in a different language, you can use ``CALENDAR_LOCALE``. The upcoming
-events list won't be translated, though. For that you'll need to specify your ``LANGUAGE_CODE``
-in the Django settings. Also note that to use ``CALENDAR_LOCALE`` you'll need to have the correct
-locale pack installed for your system. Example of changing the language to German::
-
-    CALENDAR_LOCALE = 'de_DE.utf8'
-
 
 Default time format is "%I:%M%p" but it can be changed with next setting::
 

@@ -1,3 +1,13 @@
+Version 0.2.6 (July 13, 2015)
+-----------------------------
+
+  * Bob Bowles <https://github.com/BobBowles> suggested using an empty
+    string as the default locale (which means the system locale will be
+    used) instead of en_US in utils/display.py. Seems like a good idea 
+    so I made the change. Also updated readme to emphasize that the
+    locale can be specified via CALENDAR_LOCALE setting in settings.py.
+
+
 Version 0.2.5 (June 22, 2015)
 -----------------------------
 
