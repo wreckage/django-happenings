@@ -231,6 +231,8 @@ If you used ``event.l_start_date()``/``event.l_end_date()``/``event.start_end_di
 
 * They are now cached_properties: use them without brackets or use ``get_FOO()`` (example: ``get_l_start_date()``)
 
+Event details template (``tempaltes/happenings/event_detail.html``) now uses ``"SHORT_DATE_FORMAT"`` instead of ``"D F d, Y"`` format. To use this format either change SHORT_DATE_FORMAT in settings or copy template and change it as you like.
+
 
 Tests
 -------------
