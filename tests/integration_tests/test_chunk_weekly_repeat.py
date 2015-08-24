@@ -18,6 +18,7 @@ class WeeklyRepeatingChunkEventListViewTest(SetMeUp):
                 response = self.client.get(reverse(
                     'calendar:list', kwargs={'year': year, 'month': month}
                 ))
+                self.clean_whitespace(response)
                 if days:
                     self.assertContains(response, event.title)
                 else:
@@ -105,6 +106,7 @@ class WeeklyRepeatingChunkEventListViewTest(SetMeUp):
                 response = self.client.get(reverse(
                     'calendar:list', kwargs={'year': year, 'month': month}
                 ))
+                self.clean_whitespace(response)
                 self.assertContains(response, event.title)
 
                 for day in days:

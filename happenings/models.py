@@ -2,13 +2,16 @@ from __future__ import unicode_literals
 
 import datetime
 
-from django.db import models
-from django.core.urlresolvers import reverse
-from django.core.exceptions import ValidationError
-from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.urlresolvers import reverse
+from django.db import models
+from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.functional import cached_property
+from django.utils.translation import ugettext_lazy as _
+
 
 from .managers import EventManager
 
@@ -80,18 +83,30 @@ class Event(models.Model):
         help_text=_('Must be a valid hex triplet. Default is black (000000)')
     )
 
-    @property
-    def l_start_date(self):
+    def __init__(self, *args, **kwargs):
+        super(Event, self).__init__(*args, **kwargs)
+        self._last_popover_html = None
+        self._last_check_if_cancelled = None
+        self.title_extra = ''
+
+    def get_l_start_date(self):
         """Localized start date."""
         return timezone.localtime(self.start_date)
 
-    @property
-    def l_end_date(self):
+    @cached_property
+    def l_start_date(self):
+        return self.get_l_start_date()
+
+    def get_l_end_date(self):
         """Localized end date."""
         return timezone.localtime(self.end_date)
 
+    @cached_property
+    def l_end_date(self):
+        return self.get_l_end_date()
+
     def is_happening(self, now):
-        """Returns True if the event is happening 'now', False if not."""
+        """Return True if the event is happening 'now', False if not."""
         start = self.l_start_date
         end = self.l_end_date
         happening = False
@@ -146,7 +161,7 @@ class Event(models.Model):
         mo = self.l_start_date.month == month or self.l_end_date.month == month
         return yr and mo
 
-    def start_end_diff(self):
+    def get_start_end_diff(self):
         """Return the difference between start and end dates."""
         s = self.l_start_date
         e = self.l_end_date
@@ -154,6 +169,10 @@ class Event(models.Model):
         end = datetime.date(e.year, e.month, e.day)
         diff = start - end
         return abs(diff.days)
+
+    @cached_property
+    def start_end_diff(self):
+        return self.get_start_end_diff()
 
     def get_colors(self):
         bg = self.background_color_custom
@@ -166,13 +185,39 @@ class Event(models.Model):
         fnt = '#' + fnt
         return bg, fnt
 
-    def will_occur(self, now):
-        """Returns True if the event will occur again after 'now'."""
-        return self.end_repeat is None or self.end_repeat >= now.date() or \
-            self.l_start_date >= now or self.l_end_date >= now
+    @cached_property
+    def colors(self):
+        return self.get_colors()
+
+    def will_occur(self, after_time):
+        """Return True if the event will occur again after 'after_date'."""
+        return (
+            self.end_repeat is None
+            or
+            self.end_repeat >= after_time.date()
+            or
+            self.l_start_date >= after_time
+            or
+            self.l_end_date >= after_time
+        )
 
     def __str__(self):
         return self.title
+
+    def check_if_cancelled(self, date):
+        """Return True if event was in cancelled state at 'date'. Also set set self.title_extra to ' (CANCELLED)' if it was so."""
+        result = False
+        result = self.cancellations.filter(date=date).exists()
+        if result:
+            self.title_extra = _(" (CANCELLED)")
+        self._last_check_if_cancelled = result
+        return result
+
+    @property
+    def last_check_if_cancelled(self):
+        if self._last_check_if_cancelled is None:
+            raise AttributeError("Event.last_check_if_cancelled can't be used yet: call Event.check_if_cancelled")
+        return self._last_check_if_cancelled
 
     def clean(self):
         self.clean_start_end_dates()

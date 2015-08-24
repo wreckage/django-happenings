@@ -7,7 +7,12 @@ from django.utils import timezone
 from django.utils.six.moves import xrange
 
 
-now = timezone.localtime(timezone.now())
+get_now = lambda: timezone.localtime(timezone.now())
+
+now = get_now()
+# what will happen for long running processes in mudules that use ``from happenings.utils.common import now``?
+# Will it be set on initialization of modules or will it be always new?
+# Maybe we should always use get_now() instead of now to make things clear?
 
 
 def inc_month(month, year):

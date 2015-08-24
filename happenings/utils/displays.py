@@ -9,8 +9,17 @@ from .handlers import CountHandler
 from .calendars import EventCalendar, MiniEventCalendar
 from .common import get_next_and_prev
 
-LOC = str(getattr(settings, "CALENDAR_LOCALE", ""))
-locale.setlocale(locale.LC_ALL, LOC)
+try:
+    CALENDAR_LOCALE = str(getattr(settings, "CALENDAR_LOCALE", ""))
+    locale.setlocale(locale.LC_ALL, CALENDAR_LOCALE)
+except Exception:
+    if CALENDAR_LOCALE == str(''):
+        # locale.setlocale(x, '') failes with "Error: unsupported locale setting" on some systems
+        CALENDAR_LOCALE = str('en_US.UTF-8')
+        locale.setlocale(locale.LC_ALL, CALENDAR_LOCALE)
+    else:
+        # reraise: maybe wrong locale was set?
+        raise
 
 
 def add_occurrences(events, count):
@@ -49,7 +58,7 @@ def month_display(year, month, all_month_events,
                 if item[1] == event.pk:
                     l.insert(0, l.pop(l.index(item)))
 
-    args = (year, month, count, all_month_events, start_day, LOC)
+    args = (year, month, count, all_month_events, start_day, CALENDAR_LOCALE)
     if not mini:
         html_cal = EventCalendar(*args).formatmonth(year, month)
     else:

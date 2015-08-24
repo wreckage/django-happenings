@@ -18,6 +18,7 @@ class YearlyRepeatingChunkEventListViewTest(SetMeUp):
                 response = self.client.get(reverse(
                     'calendar:list', kwargs={'year': year, 'month': month}
                 ))
+                self.clean_whitespace(response)
                 if days:
                     self.assertContains(response, event.title)
                 else:

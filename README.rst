@@ -119,7 +119,7 @@ Template tags are available by loading ``happenings_tags`` into your template::
 
     {% load happenings_tags %}
 
-This gives access to three template tags: 
+This gives access to three template tags:
 ``show_calendar``, ``upcoming_events``, and ``current_happenings``.
 
 Use ``show_calendar`` like this::
@@ -171,7 +171,7 @@ Example of changing to U.S. English::
 
     CALENDAR_LOCALE = 'en_US.utf8'
 
-By default, the system's locale is used, so setting ``CALENDAR_LOCALE`` also ensures that you're 
+By default, the system's locale is used, so setting ``CALENDAR_LOCALE`` also ensures that you're
 using the locale you want.
 
 Optional Settings
@@ -189,9 +189,48 @@ of starting the calendar on Sunday (instead of the default of Monday)::
 
     CALENDAR_START_DAY = 6
 
-Default time format is "%I:%M%p" but it can be changed with next setting::
+Default `time format <https://docs.djangoproject.com/en/1.7/ref/templates/builtins/#date>`_ is "TIME_FORMAT" (user locale dependend if  ``USE_L10N`` is used or default django format if not used). This can be changed with next setting::
 
-	CALENDAR_TIME_FORMAT = '%H:%M'
+	CALENDAR_TIME_FORMAT = 'H:i'
+	## or
+	# CALENDAR_HOUR_FORMAT = 'g:iA'  # 12 hour format with AM/PM
+
+In titles of events minutes may be stripped from time when there are 0 minutes. This depends on i18 settings and your CALENDAR_TIME_FORMAT settings. You may set some specific value with next setting:
+
+	CALENDAR_HOUR_FORMAT = 'H'
+	## or
+	# CALENDAR_HOUR_FORMAT = 'gA'  # 12 hour format with AM/PM
+
+
+Upgrading from 0.2.X to 0.3.X
+-----------------------------
+
+Starting from 0.3.1 calendar rendering uses django templates to generate calendar
+cells (``templates/happenings/partials/calendar/*.html```).
+If you haven't customized anything and used default settings then everything will
+still work out of the box.
+
+If you have sublcassed ``EventCalendar`` or ``MiniEventCalendar`` calendar then you have 2 options:
+
+* subclass ``LegacyEventCalendar`` or ``LegacyMiniEventCalendar``
+* copy ``templates/happenings/partials/calendar/*.html``` templates to your project ``templates``
+  directory and customize them
+
+If you are using custom ``CALENDAR_TIME_FORMAT`` setting then you also have 2 options:
+
+* Just remove this setting and use default setting of django ``TIME_FORMAT``.
+* change it from python strftime notation to `Django (PHP) notation <https://docs.djangoproject.com/en/1.7/ref/templates/builtins/#date>`_.  Specifying ``CALENDAR_HOUR_FORMAT`` is also a good idea:
+
+  .. code-block:: python
+
+	 # CALENDAR_TIME_FORMAT = '%H:%M'  # pre 0.3.1 version
+	 CALENDAR_TIME_FORMAT = 'H:i'
+	 CALENDAR_HOUR_FORMAT = 'H'
+
+If you used ``event.l_start_date()``/``event.l_end_date()``/``event.start_end_diff()`` in your code:
+
+* They are now cached_properties: use them without brackets or use ``get_FOO()`` (example: ``get_l_start_date()``)
+
 
 Tests
 -------------

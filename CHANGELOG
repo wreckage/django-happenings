@@ -1,9 +1,31 @@
+Version 0.3.1 (August 25, 2015)
+-----------------------------
+
+  * Yaroslav Klyuyev <https://github.com/imposeren> suggested using django
+  templates to build calendar cells. Some reverse incompatible changes were
+  introduced: please read "Update from 0.2 to 0.3" section in README.
+  New "features":
+
+    * Default django setting "TIME_FORMAT" is used by default. Custom values for
+    CALENDAR_TIME_FORMAT must be changed to new notation
+
+    * popover contents in data-content are properly escaped. Previously it was
+    possible to break layout by using ``"`` (double quotation marks) in
+    description or locations
+
+    * i18n is used for all parts of calendar (no translations provided)
+
+    * calendar style maybe customized just by overriding templates: no subclassing
+    is needed anymore
+
+
+
 Version 0.2.6 (July 13, 2015)
 -----------------------------
 
   * Bob Bowles <https://github.com/BobBowles> suggested using an empty
     string as the default locale (which means the system locale will be
-    used) instead of en_US in utils/display.py. Seems like a good idea 
+    used) instead of en_US in utils/display.py. Seems like a good idea
     so I made the change. Also updated readme to emphasize that the
     locale can be specified via CALENDAR_LOCALE setting in settings.py.
 
@@ -55,7 +77,7 @@ Version 0.2.1 (June 16, 2014)
   * fixed a bug with upcoming events template tag and events that occur same
       datetime
   * merged repeat() and month_events() in managers.py into all_month_events()
-  * events now sorted correctly (i.e. earliest 1st) in day view and 
+  * events now sorted correctly (i.e. earliest 1st) in day view and
       mini calendar
   * Added CountHandler object in handlers.py
   * Added test to check for proper event ordering
@@ -83,9 +105,9 @@ Version 0.2 (June 08, 2014)
 Version 0.1.2 (May 30, 2014)
 ----------------------------
 
-  * Found and fixed a bug w/ next_event. Switched the 
+  * Found and fixed a bug w/ next_event. Switched the
     calls to handle_count on lines 51/52.
-  * created Repeater class in handlers.py, and gave each type of 
+  * created Repeater class in handlers.py, and gave each type of
     repeat its own extended repeater class.
   * Added a few more tests (including one to cover the next_event
     bug).

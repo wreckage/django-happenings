@@ -71,7 +71,7 @@ class TestHandlers(SetMeUp):
             utc=True
         )
         c = h._chunk_fill_out_first_week(
-            self.year, self.month, self.counter, event, event.start_end_diff()
+            self.year, self.month, self.counter, event, event.get_start_end_diff()
         )
         self.assertEqual(len(c), 1)
 

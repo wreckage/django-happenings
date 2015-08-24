@@ -121,7 +121,7 @@ class Repeater(object):
         r.repeat()
         if self.event.is_chunk() and r.count:
             r.day = min(r.count)
-            r.repeat_chunk(self.event.start_end_diff())
+            r.repeat_chunk(self.event.start_end_diff)
         return r.count
 
 
@@ -235,7 +235,7 @@ class WeeklyRepeater(Repeater):
             if self.event.is_chunk() and min(mycount) not in xrange(1, 8):
                 mycount = _chunk_fill_out_first_week(
                     self.year, self.month, mycount, self.event,
-                    diff=self.event.start_end_diff()
+                    diff=self.event.start_end_diff,
                 )
             for k, v in mycount.items():
                 for item in v:
@@ -262,7 +262,7 @@ class WeeklyRepeater(Repeater):
             # event.l_start_date.day
             self.repeat()
             if self.event.is_chunk():
-                diff = self.event.start_end_diff()
+                diff = self.event.start_end_diff
                 self.count = _chunk_fill_out_first_week(
                     self.year, self.month, self.count, self.event, diff
                 )
@@ -296,7 +296,7 @@ class WeeklyRepeater(Repeater):
                 if self.event.repeats(repeat):
                     self.repeat()
                     if self.event.is_chunk():
-                        self.repeat_chunk(diff=self.event.start_end_diff())
+                        self.repeat_chunk(diff=self.event.start_end_diff)
 
     def repeat_it(self):
         if self.event.end_repeat is not None:

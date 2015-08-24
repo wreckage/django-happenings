@@ -1,0 +1,35 @@
+{% load i18n %}
+{% load url from future %}
+<td class="{{ cssclass }} {% if is_current_day %}calendar-today{% endif %}">
+<div class="td-inner">
+  <a
+     {% if URLS_NAMESPACE %}
+      href="{% url URLS_NAMESPACE|add:':day_list' calendar.yr calendar.mo day %}"
+    {% else %}
+      href="{% url 'day_list' calendar.yr calendar.mo day %}"
+    {% endif %}
+  >{{ day }}</a>
+  {% block "day_contents" %}
+    {% for event in events %}
+      <a class="event-anch" href="{{ event.get_absolute_url }}">
+        <div
+             title="{{ event.title }}{{ event.title_extra }}"
+             data-content="{% filter force_escape %}{% include popover_template %}{% endfilter %}"
+             data-container="body"
+             data-toggle="popover"
+             data-html="true"
+             class="calendar-event"
+             style="background:{{ event.colors.bg }};color:{{ event.colors.fnt  }};"
+             >
+          {% if event.l_start_date.minute %}
+            {{ l_start_date|time:CALENDAR_TIME_FORMAT }}
+          {% else %}
+            {{ l_start_date|time:CALENDAR_HOUR_FORMAT }}
+          {% endif %}
+          {{ event.title }}{{ event.title_extra }}
+        </div>
+      </a>
+    {% endfor %}
+  {% endblock "day_contents" %}
+</div>
+</td>

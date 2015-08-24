@@ -1,0 +1,12 @@
+<ul>
+  {% for event in events %}
+    <li><a href="{{ event.get_absolute_url }}">
+      {% if event.l_start_date.minute %}
+        {{ l_start_date|time:CALENDAR_TIME_FORMAT }}
+      {% else %}
+        {{ l_start_date|time:CALENDAR_HOUR_FORMAT }}
+      {% endif %}
+      {{ event.title }}{{ event.title_extra }}
+    </a></li>
+  {% endfor %}
+</ul
