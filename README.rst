@@ -212,7 +212,7 @@ still work out of the box.
 
 If you have sublcassed ``EventCalendar`` or ``MiniEventCalendar`` calendar then you have 2 options:
 
-* subclass ``LegacyEventCalendar`` or ``LegacyMiniEventCalendar``
+* subclass ``LegacyEventCalendar`` or ``LegacyMiniEventCalendar``. You should also set ``CALENDAR_LEGACY_TIME_FORMAT`` in settings.
 * copy ``templates/happenings/partials/calendar/*.html``` templates to your project ``templates``
   directory and customize them
 
