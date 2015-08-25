@@ -82,6 +82,8 @@ Quick Install
 
   url(r'^calendar/', include('happenings.urls', namespace='calendar'))
 
+  If your are going to use different namespace then please set ``CALENDAR_URLS_NAMESPACE`` in settings
+
 4. Make sure your ``TIME_ZONE`` is set correctly in settings.py.
 
 5. Run ``python manage.py migrate`` to create the models (replace ``migrate`` with
@@ -179,6 +181,8 @@ Optional Settings
 -----------------
 
 You can specify different settings for the app in your settings.py file.
+
+Use ``CALENDAR_URLS_NAMESPACE`` if you included ``happenings.urls`` with namespace other than ``'calendar'``
 
 Use ``CALENDAR_COLORS`` to add a custom color to the drop down in the admin when
 creating an event. Example of setting the custom color 'fuchsia'::
