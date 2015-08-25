@@ -13,7 +13,7 @@ from happenings.utils.common import (
     get_net_category_tag,
     get_qs,
     clean_year_month,
-    now
+    get_now
 )
 
 register = Library()
@@ -22,6 +22,7 @@ start_day = getattr(settings, "CALENDAR_START_DAY", 0)
 
 @register.simple_tag
 def show_calendar(req, mini=False):
+    now = get_now()
     net, category, tag = get_net_category_tag(req)
     year = now.year
     month = now.month + net
@@ -44,7 +45,9 @@ def show_calendar(req, mini=False):
 
 
 @register.inclusion_tag('happenings/partials/upcoming_events.html')
-def upcoming_events(now=timezone.localtime(timezone.now()), finish=90, num=5):
+def upcoming_events(now=None, finish=90, num=5):
+    if now is None:
+        now = get_now()
     finish = now + timezone.timedelta(days=finish)
     finish = finish.replace(hour=23, minute=59, second=59, microsecond=999)
     all_upcoming = (UpcomingEvents(x, now, finish, num).get_upcoming_events()
@@ -58,7 +61,9 @@ def upcoming_events(now=timezone.localtime(timezone.now()), finish=90, num=5):
 
 
 @register.inclusion_tag('happenings/partials/happening_events.html')
-def current_happenings(now=timezone.localtime(timezone.now())):
+def current_happenings(now=None):
+    if now is None:
+        now = get_now()
     temp = now
     drepl = lambda x: temp.replace(  # replace hr, min, sec, msec of 'now'
         hour=x.l_start_date.hour,

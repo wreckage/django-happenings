@@ -57,8 +57,9 @@ class EventMonthView(GenericEventView):
         querystrings. If none, or if cal_ignore qs is specified,
         sets year and month to this year and this month.
         """
-        year = c.now.year
-        month = c.now.month + net
+        now = c.get_now()
+        year = now.year
+        month = now.month + net
         month_orig = None
 
         if 'cal_ignore=true' not in qs:
@@ -203,14 +204,16 @@ class EventDetailView(DetailView):
         )
 
     def get_cncl_days(self):
+        now = c.get_now()
         cncl = self.object.cancellations.all()
-        return [(x.date, x.reason) for x in cncl if x.date >= c.now.date()]
+        return [(x.date, x.reason) for x in cncl if x.date >= now.date()]
 
     def check_cncl(self, d):
         cncl = self.object.cancellations.all()
         return True if [x for x in cncl if x.date == d] else False
 
     def get_context_data(self, **kwargs):
+        now = c.get_now()
         context = super(EventDetailView, self).get_context_data(**kwargs)
         e = self.object
 
@@ -222,8 +225,8 @@ class EventDetailView(DetailView):
 
         event = [e]  # event needs to be an iterable, see get_next_event()
         if not e.repeats('NEVER'):  # event is ongoing; get next occurrence
-            if e.will_occur(c.now):
-                year, month, day = get_next_event(event, c.now)
+            if e.will_occur(now):
+                year, month, day = get_next_event(event, now)
                 next_event = date(year, month, day)
                 context['next_event'] = date(year, month, day)
                 context['next_or_prev_cncl'] = self.check_cncl(next_event)
