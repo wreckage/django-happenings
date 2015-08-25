@@ -1,0 +1,28 @@
+{% load i18n %}
+<p>
+  <b>{% trans "When:" %}</b>
+  {{ display_month }} {{  day }},
+  {{ event.l_start_date|time:CALENDAR_TIME_FORMAT }} - {{ event.l_end_date|time:CALENDAR_TIME_FORMAT }}
+</p>
+
+{% if event.location.exists %}
+<p>
+  <b>{% trans "Where:" %}</b>
+  {% for l in event.location.all %}
+    {{ l.name }}
+  {% endfor %}
+</p>
+{% endif %}
+
+{% if event.description %}
+  <p>
+    <b>{% trans "Description:" %}</b>
+    {% if event.description|length > 105 %}
+      {{ event.description|truncatechars:100 }}…
+    {% else %}
+      {{ event.description }}
+    {% endif %}
+  </p>
+{% endif %}
+
+<br><a href="{{ event.get_absolute_url }}">{% trans "View details" %}</a>

@@ -27,12 +27,14 @@ class EventCalendarTest(SetMeUp):
         )
         # Test first without a location
         events = [event]
+        day = 15
+        count_dict = {day: [(event.title, event.pk)]}
+
         cal = EventCalendar(yr, mo, count, events)
-        cal.event = event
-        cal.title = event.title
-        cal.day = 15
-        cal.popover_helper()
-        self.assertNotIn("Heck", cal.where)
+        cal.count = count_dict
+        render_result = cal.formatday(day, 0)
+        self.assertNotIn("Where:", render_result)
+        self.assertNotIn("Heck", render_result)
 
         # Test with a location
         event.location.create(
@@ -40,11 +42,11 @@ class EventCalendarTest(SetMeUp):
         )
         events = [event]
         cal2 = EventCalendar(yr, mo, count, events)
-        cal2.event = event
-        cal2.title = event.title
-        cal2.day = 15
-        cal2.popover_helper()
-        self.assertIn("Heck", cal2.where)
+        cal2.count = count_dict
+        render_result = cal2.formatday(day, 0)
+        self.assertIn("Where:", render_result)
+        self.assertIn("Heck", render_result)
+
 
 class MiniEventCalendarTest(SetMeUp):
     def test_popover_helper(self):
@@ -67,5 +69,6 @@ class MiniEventCalendarTest(SetMeUp):
         for day in days:
             cal.title = event.title
             cal.day = day
-            cal.popover_helper()
-            self.assertIn(event.title, cal.cal_event)
+            cal.count = {day: [(event.title, event.pk)]}
+            rendered_result = cal.formatday(day, 0)
+            self.assertIn(event.title, rendered_result)

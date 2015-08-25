@@ -23,6 +23,8 @@ SITE_ID = 1
 USE_TZ = True
 
 SECRET_KEY = 'very very secret code here. seriously.'
+TIME_FORMAT = 'h:iA'
+SHORT_DATE_FORMAT = 'D F d, Y'
 
 STATIC_URL = '/static/'
 

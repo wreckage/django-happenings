@@ -19,6 +19,7 @@ class ChunkEventListViewTest(SetMeUp):
             response = self.client.get(reverse(
                 'calendar:list', kwargs={'year': '2014', 'month': month}
             ))
+            self.clean_whitespace(response)
             self.assertContains(response, event.title)
 
             for day in days:

@@ -1,0 +1,13 @@
+{% extends "happenings/partials/calendar/day_cell.html" %}
+
+{% block "day_contents" %}
+  <div
+       data-content="{% filter force_escape %}{% include popover_template %}{% endfilter %}"
+       data-container="body"
+       data-toggle="popover"
+       data-html="true"
+       class="calendar-event"
+       >
+        {{ num_events }}
+  </div>
+{% endblock %}

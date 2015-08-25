@@ -18,6 +18,7 @@ class RepeatingEventListViewTest(SetMeUp):
                 response = self.client.get(reverse(
                     'calendar:list', kwargs={'year': year, 'month': month}
                 ))
+                self.clean_whitespace(response)
                 if days:
                     self.assertContains(response, event.title)
                 else:
@@ -40,6 +41,7 @@ class RepeatingEventListViewTest(SetMeUp):
                 response = self.client.get(reverse(
                     'calendar:list', kwargs={'year': year, 'month': month}
                 ))
+                self.clean_whitespace(response)
                 if days:
                     self.assertContains(response, title)
                 else:
@@ -59,6 +61,7 @@ class RepeatingEventListViewTest(SetMeUp):
                             'year': str(int(year) + 1), 'month': month
                         }
                     ))
+                    self.clean_whitespace(response)
                     self.assertNotContains(response, title)
 
             # all the events are scheduled for 2014, so 2015 shouldn't see any
@@ -120,7 +123,8 @@ class RepeatingEventListViewTest(SetMeUp):
         response = self.client.get(reverse(
             'calendar:list', kwargs={'year': '2014', 'month': '5'}
         ))
-        match = re.findall('May 26, 12:00AM - 12:00AM', str(response.content))
+        self.clean_whitespace(response)
+        match = re.findall('May 26,12:00AM - 12:00AM', str(response.content))
         self.assertEqual(1, len(match))
 
     def test_list_view_with_never_ending_weekly_repeat(self):
@@ -263,6 +267,7 @@ class RepeatingEventListViewTest(SetMeUp):
                 response = self.client.get(reverse(
                     'calendar:list', kwargs={'year': year, 'month': month}
                 ))
+                self.clean_whitespace(response)
                 self.assertContains(response, event.title)
                 [self.assertContains(response, self.cal_str(day)) for
                  day in xrange(1, monthrange(2014, int(month) + 1)[1])]
@@ -271,6 +276,7 @@ class RepeatingEventListViewTest(SetMeUp):
         response = self.client.get(reverse(
             'calendar:list', kwargs={'year': '2014', 'month': '03'}
         ))
+        self.clean_whitespace(response)
         self.assertNotContains(response, event.title)
         self.assertNotContains(response, self.event_div)
 

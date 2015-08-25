@@ -242,7 +242,7 @@ class EventDetailView(DetailView):
                 # list of days for single-day event chunk
                 context['event_days'] = (  # list comp
                     (e.l_start_date + timedelta(days=x))
-                    for x in range(e.start_end_diff() + 1)
+                    for x in range(e.start_end_diff + 1)
                 )
             else:
                 # let template know if this single-day, non-repeating event is

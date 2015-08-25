@@ -1,0 +1,24 @@
+{% load i18n %}
+<p>
+  <b>{% trans "When:" %}</b>
+  {{ display_month }} {{  calendar.day}},
+  {{self.event.l_start_date|time}} - {{  event.l_end_date|time }}
+</p>
+
+<p>
+  <b>{% trans "Where:" %}</b>
+  {% for l in event.location.all %}
+    {{ l.name }}
+  {% endfor %}
+</p>
+
+<p>
+  <b>{% trans "Description:" %}</b>
+  {% if event.description|length > 105 %}
+    {{ event.description|truncatechars:100 }} …
+  {% else %}
+    {{ event.description }}
+  {% endif %}
+</p>
+
+<br><a href="{{ event.get_absolute_url }}">{% trans "View details" %}</a>

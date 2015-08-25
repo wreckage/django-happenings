@@ -1,63 +1,65 @@
 {% extends 'happenings/middle.html' %}
-{% load staticfiles %}
+{% load staticfiles i18n %}
 
 {% block content %}
         <h1>{{ event.title }}</h1>
         <p>{{ event.description }}</p>
 
         {% if event.start_end_diff %}
-            <b>This is a {{ event.start_end_diff|add:"1" }} day event.</b><br>
+            <b>{% blocktrans with event_duration_days=event.start_end_diff %}This is a {{ event_duration_days }} day event.{% endblocktrans %}</b><br>
         {% endif %}
 
         {% if next_event %}
-        <b>This event repeats {{ repeat | lower }}.</b>
+        <b>{% blocktrans with repeat_lower=repeat|lower %}This event repeats {{ repeat_lower }}.{% endblocktrans %}</b>
             <p>
-                Next event date: 
-                    {{ next_event|date:"D F d, Y" }}
-                    {{ event.start_date|date:"g:i a" }} -
-                    {{ event.end_date|date:"g:i a e" }}{% if next_or_prev_cncl %} (CANCELLED){% endif %}
+                {{ _("Next event date:") }}
+                    {{ next_event|date:"SHORT_DATE_FORMAT" }}
+                    {{ event.start_date|time }} -
+                    {{ event.end_date|time }}{% if next_or_prev_cncl %} {{ _("(CANCELLED)") }}{% endif %}
         {% elif last_event %}
-            <b>This was an event that repeated {{ repeat | lower }}.</b>
-            <p>The last event was on {{ last_event|date:"D F d, Y" }}{% if next_or_prev_cncl %} (CANCELLED){% endif %}
+            <b>{% blocktrans with repeat_lower=repeat|lower %}This was an event that repeated {{ repeat_lower }}.{% endblocktrans %}</b>
+            <p>{% blocktrans with last_event_date=last_event|date:"SHORT_DATE_FORMAT" %}The last event was on {{ last_event_date }}{% endblocktrans %}{% if next_or_prev_cncl %} {{ _("(CANCELLED)") }}{% endif %}
         {% else %}
-            <p>When:
+            <p>{{ _("When:") }}
             {% if event_days %}
                 <ul>
                 {% for e in event_days %}
                     <li>
-                        Day {{ forloop.counter }}: {{ e|date:"D F d, Y" }} - {{ event.end_date|date:"g:i a e" }}
+                        {% blocktrans with num_day=forloop.counter %}Day {{ num_day }}{% endblocktrans %}: {{ e|date:"SHORT_DATE_FORMAT" }} - {{ event.end_date|time }}
                         {% for c in event.cancellations.all %}
                             {% if c.date == e.date %}
-                                (CANCELLED)
+                                {{ _("(CANCELLED)") }}
                             {% endif %}
                     </li>
                     {% endfor %}
                 {% endfor %}
                 </ul>
             {% else %}
-                    {{ event.start_date|date:"D F d, Y" }} - {{ event.end_date|date:"g:i a e" }}
-                    {% if this_cncl %} (CANCELLED){% endif %}
+                    {{ event.start_date|date:"SHORT_DATE_FORMAT" }} - {{ event.end_date|time }}
+                    {% if this_cncl %} {{ _("(CANCELLED)") }}{% endif %}
             {% endif %}
         {% endif %}
-        (today is: {% now "D M d, Y" %})</p>
+
+        ({{ _("today is:") }} {% now "SHORT_DATE_FORMAT" %})
+        </p>
         {% if cncl_days %}
-            <p>This event has been cancelled on the following day(s):</p>
+            <p>{{ _("This event has been cancelled on the following day(s):") }}</p>
             <ul>
             {% for d, reason in cncl_days %}
-                <li>{{ d|date:"D F d, Y" }} - Reason: {{ reason }}</li>
+                <li>{{ d|date:"SHORT_DATE_FORMAT" }} - {% blocktrans %}Reason: {{ reason }}{% endblocktrans %}</li>
             {% endfor %}
             </ul>
         {% endif %}
 
         {% if event.location.all %}
-        <p>Location{{ event.location.all|pluralize }}:<br>
+        <p>{% blocktrans count counter=event.location.all.count %}Location:{% plural %}Locations:{% endblocktrans %}<br>
         {% for l in event.location.all %}
             {{ l.name }}<br>
             {% if l.address_line_1 %}{{ l.address_line_1 }}<br>{% endif %}
             {% if l.address_line_2 %}{{ l.address_line_2 }}<br>{% endif %}
             {% if l.address_line_3 %}{{ l.address_line_3 }}<br>{% endif %}
-            {% if l.city %}{{ l.city }},{% endif %} 
-            {% if l.state %}{{ l.state }}{% endif %} 
+            {% if l.city %}{{ l.city }},{% endif %}
+            {% if l.state %}{{ l.state }}{% endif %}
             {% if l.zipcode %}{{ l.zipcode }}<br>{% endif %}
             {% if l.country %}{{ l.country }}<br>{% endif %}
         {% endfor %}
@@ -66,7 +68,7 @@
 
 
         {% if event.categories.all %}
-            Categor{{ event.categories.all|pluralize:"y,ies" }}:
+            {% blocktrans count counter=event.categories.all.count %}Category:{% plural %}Categories:{% endblocktrans %}
             <ul>
                 {% for category in event.categories.all %}
                 <li>{{ category.title }}</li>
@@ -75,7 +77,7 @@
         {% endif %}
 
         {% if event.tags.all %}
-            Tag{{ event.tags.all|pluralize }}:
+            {% blocktrans count counter=event.tags.all.count %}Tag:{% plural %}Tags:{% endblocktrans %}
             <ul>
                 {% for tag in event.tags.all %}
                 <li>{{ tag.name }}</li>

@@ -46,7 +46,7 @@ class EventModelTest(SetMeUp):
                 description="Amazing event",
                 repeat="NEVER",
             )
-            self.assertEqual(event.start_end_diff(), 8)
+            self.assertEqual(event.get_start_end_diff(), 8)
             event.full_clean()
 
         # ...but not here
@@ -57,7 +57,7 @@ class EventModelTest(SetMeUp):
             title="The Other Event",
             description="Awesome event"
         )
-        self.assertEqual(event.start_end_diff(), 7)
+        self.assertEqual(event.get_start_end_diff(), 7)
 
     def test_end_repeat_date_but_no_repeat(self):
         """
@@ -252,4 +252,4 @@ class ModelMethodsTest(SetMeUp):
             title="The Event",
             description="Special event"
         )
-        self.assertEqual(1, event.start_end_diff())
+        self.assertEqual(1, event.get_start_end_diff())
