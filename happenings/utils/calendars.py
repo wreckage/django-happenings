@@ -8,6 +8,7 @@ import sys
 
 # django:
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 
 # thirdparties:
@@ -82,9 +83,13 @@ class GenericCalendar(LocaleHTMLCalendar):
             '<td class="%s calendar-today"><div class="td-inner">' % (
                 self.cssclasses[weekday])
         )
-        self.day_url = "/%s/%d/%d/%d" % (
-            URL, self.yr, self.mo, day
-        )
+        if URLS_NAMESPACE:
+            url_name = '%s:day_list' % (URLS_NAMESPACE)
+        else:
+            url_name = 'day_list'
+
+        self.day_url = reverse(url_name, args=(self.yr, self.mo, day))
+        self.day = day
 
         self.anch = '<a href="%s">%d</a>' % (
             self.day_url, day
