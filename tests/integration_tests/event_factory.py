@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 import datetime
@@ -27,15 +28,15 @@ class SetMeUp(TestCase):
         cls.user.delete()
 
     def clean_whitespace(self, response):
-        """Remove all newlines and all occurances of multiple spaces"""
-        response.content = response.content.replace('\n', '')
+        """Remove all newlines and all occurances of multiple spaces."""
+        response.content = response.content.replace(b'\n', b'')
 
         for num_spaces in range(7, 2, -1):
             # reduce all multiple spaces to 2 spaces.
             # We can process here only `num_spaces=3` with the same result, but it will be slower
-            while response.content.find(' '*num_spaces) >= 0:
-                response.content = response.content.replace(' '*num_spaces, ' '*2)
-        response.content = response.content.replace(' '*2, '')
+            while response.content.find(b' '*num_spaces) >= 0:
+                response.content = response.content.replace(b' '*num_spaces, b' '*2)
+        response.content = response.content.replace(b' '*2, b'')
 
 
 
