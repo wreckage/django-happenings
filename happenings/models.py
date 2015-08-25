@@ -206,7 +206,10 @@ class Event(models.Model):
         return self.title
 
     def check_if_cancelled(self, date):
-        """Return True if event was in cancelled state at 'date'. Also set set self.title_extra to ' (CANCELLED)' if it was so."""
+        """Return True if event was in cancelled state at 'date'. Also set self.title_extra to ' (CANCELLED)' if it was so.
+
+        Warning! Results are memoized on instance level. If you need to reset "cache" of results then set ``instance._prefetched_objects_cache = {}``
+        """
         result = self._check_if_cancelled_cache.get(date, None)
         if result is None:
             try:
@@ -229,7 +232,7 @@ class Event(models.Model):
     @property
     def last_check_if_cancelled(self):
         if self._last_check_if_cancelled is None:
-            raise AttributeError("Event.last_check_if_cancelled can't be used yet: call Event.check_if_cancelled")
+            raise AttributeError("``event.last_check_if_cancelled`` can't be used yet: call ``event.check_if_cancelled(date)`` first")
         return self._last_check_if_cancelled
 
     def clean(self):
