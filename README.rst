@@ -69,20 +69,20 @@ Quick Install
 
 2. Add ``happenings`` to ``INSTALLED_APPS``:
 
-.. code-block:: python
+   .. code-block:: python
 
-  INSTALLED_APPS = (
-    ...
-    'happenings',
-  )
+	  INSTALLED_APPS = (
+	    ...
+	    'happenings',
+	  )
 
 3. Include the ``django-happenings`` URLconf in urls.py:
+   
+   .. code-block:: python
 
-.. code-block:: python
-
-  url(r'^calendar/', include('happenings.urls', namespace='calendar'))
-
-  If your are going to use different namespace then please set ``CALENDAR_URLS_NAMESPACE`` in settings
+      url(r'^calendar/', include('happenings.urls', namespace='calendar'))
+   
+   If your are going to use different namespace then please set ``CALENDAR_URLS_NAMESPACE`` in settings
 
 4. Make sure your ``TIME_ZONE`` is set correctly in settings.py.
 
@@ -200,11 +200,14 @@ Default `time format <https://docs.djangoproject.com/en/1.7/ref/templates/builti
 	## or
 	# CALENDAR_HOUR_FORMAT = 'g:iA'  # 12 hour format with AM/PM
 
-In titles of events minutes may be stripped from time when there are 0 minutes. This depends on i18 settings and your CALENDAR_TIME_FORMAT settings. You may set some specific value with next setting:
+In titles of events minutes may be stripped from time when there are 0 minutes. This depends on i18 settings and your CALENDAR_TIME_FORMAT settings. You may set some specific value with next setting::
 
 	CALENDAR_HOUR_FORMAT = 'H'
 	## or
 	# CALENDAR_HOUR_FORMAT = 'gA'  # 12 hour format with AM/PM
+
+	## or if you do not want minutes to be stripped
+	# CALENDAR_HOUR_FORMAT = 'H:i'
 
 
 Upgrading from 0.2.X to 0.3.X
@@ -236,7 +239,10 @@ If you used ``event.l_start_date()``/``event.l_end_date()``/``event.start_end_di
 
 * They are now cached_properties: use them without brackets or use ``get_FOO()`` (example: ``get_l_start_date()``)
 
-Event details template (``tempaltes/happenings/event_detail.html``) now uses ``"SHORT_DATE_FORMAT"`` instead of ``"D F d, Y"`` format. To use this format either change SHORT_DATE_FORMAT in settings or copy template and change it as you like.
+Event details template (``tempaltes/happenings/event_detail.html``) now uses ``"SHORT_DATE_FORMAT"`` instead of ``"D F d, Y"`` format. To use old format either change SHORT_DATE_FORMAT in settings or copy templates and change them as you like.
+
+
+Url to day details view (``EventDayView``) is now build using ``reverse``. This may have broken rendering for projects which included ``happenings.urls`` in their urlconf with namespace other than ``"calendar"``. In such case you have to set ``CALENDAR_URLS_NAMESPACE`` in settings to namespace that you use (empty string is allowed for those who do not use namespace).
 
 
 Tests
