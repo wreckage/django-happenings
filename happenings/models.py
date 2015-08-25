@@ -87,6 +87,7 @@ class Event(models.Model):
         super(Event, self).__init__(*args, **kwargs)
         self._last_popover_html = None
         self._last_check_if_cancelled = None
+        self._check_if_cancelled_cache = {}
         self.title_extra = ''
 
     def get_l_start_date(self):
@@ -206,8 +207,20 @@ class Event(models.Model):
 
     def check_if_cancelled(self, date):
         """Return True if event was in cancelled state at 'date'. Also set set self.title_extra to ' (CANCELLED)' if it was so."""
-        result = False
-        result = self.cancellations.filter(date=date).exists()
+        result = self._check_if_cancelled_cache.get(date, None)
+        if result is None:
+            try:
+                # if cancellations are prefetched then use iteration
+                self._prefetched_objects_cache[Event.cancellations.related.field.related_query_name()]
+                result = any(
+                    ((cancellation.date == date) for cancellation in self.cancellations.all())
+                )
+            except (AttributeError, KeyError):
+                result = False
+                result = self.cancellations.filter(date=date).exists()
+
+            self._check_if_cancelled_cache[date] = result
+
         if result:
             self.title_extra = _(" (CANCELLED)")
         self._last_check_if_cancelled = result
