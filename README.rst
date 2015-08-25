@@ -57,6 +57,7 @@ TWBS is used to create popovers when an event is clicked on the calendar.
 
 	SOUTH_MIGRATION_MODULES = {
 	    'taggit': 'taggit.south_migrations',
+	    'happenings': 'happenings.south_migrations',
 	}
 
 Quick Install
