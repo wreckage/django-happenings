@@ -3,7 +3,7 @@
 <td class="{{ cssclass }} {% if is_current_day %}calendar-today{% endif %}">
 <div class="td-inner">
   <a
-     {% if URLS_NAMESPACE %}
+    {% if URLS_NAMESPACE %}
       href="{% url URLS_NAMESPACE|add:':day_list' calendar.yr calendar.mo day %}"
     {% else %}
       href="{% url 'day_list' calendar.yr calendar.mo day %}"
