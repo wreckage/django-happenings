@@ -11,6 +11,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.dates import WEEKDAYS, WEEKDAYS_ABBR
+from django.utils.html import mark_safe
 
 # thirdparties:
 import six
@@ -113,8 +114,8 @@ class GenericCalendar(HTMLCalendar):
 
         nxt, prev = get_next_and_prev(net)
         extra_qs = ('&' + '&'.join(qs)) if qs else ''
-        context['prev_qs'] = '?cal_prev=%d%s' % (prev, extra_qs)
-        context['next_qs'] = '?cal_next=%d%s' % (nxt, extra_qs)
+        context['prev_qs'] = mark_safe('?cal_prev=%d%s' % (prev, extra_qs))
+        context['next_qs'] = mark_safe('?cal_next=%d%s' % (nxt, extra_qs))
         context['withyear'] = withyear
         return render_to_string(template, context)
 
