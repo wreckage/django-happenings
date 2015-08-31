@@ -3,12 +3,12 @@ from __future__ import unicode_literals
 
 # python lib:
 from datetime import date, timedelta
-from calendar import month_name
 
 # django:
 from django.views.generic import ListView, DetailView
 from django.conf import settings
 from django.shortcuts import get_object_or_404
+from django.utils.dates import MONTHS_ALT
 
 # thirdparties:
 import six
@@ -97,11 +97,11 @@ class EventMonthView(GenericEventView):
 
         # add a dict containing the year, month, and month name to the context
         current = dict(
-            year=year, month_num=month, month=month_name[month][:3]
+            year=year, month_num=month, month=MONTHS_ALT[month][:3]
         )
         context['current'] = current
 
-        display_month = month_name[month]
+        display_month = MONTHS_ALT[month]
 
         if isinstance(display_month, six.binary_type):
             display_month = display_month.decode('utf-8')
@@ -174,7 +174,7 @@ class EventDayView(GenericEventView):
         self.check_for_cancelled_events(d=date(year, month, day))
         context['events'] = self.events
 
-        display_month = month_name[month]
+        display_month = MONTHS_ALT[month]
         if isinstance(display_month, six.binary_type):
             display_month = display_month.decode('utf-8')
 

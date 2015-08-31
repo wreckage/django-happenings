@@ -244,6 +244,12 @@ Event details template (``tempaltes/happenings/event_detail.html``) now uses ``"
 
 Url to day details view (``EventDayView``) is now build using ``reverse``. This may have broken rendering for projects which included ``happenings.urls`` in their urlconf with namespace other than ``"calendar"``. In such case you have to set ``CALENDAR_URLS_NAMESPACE`` in settings to namespace that you use (empty string is allowed for those who do not use namespace).
 
+Starting from 0.3.3 django happenings does not use ``locale.setlocale`` and full utilizes
+``i18n`` features if django. To set default calendar language you should set ``LANGUAGE_CODE``
+in settings. If you have enabled language switching for your site then calendar language
+will switch languages too. If you are not using legacy calendars then
+``CALENDAR_LOCALE`` settings is not required anymore.
+
 
 Tests
 -------------
