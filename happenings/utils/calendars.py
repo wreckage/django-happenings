@@ -52,7 +52,7 @@ class GenericCalendar(HTMLCalendar):
         self.mo = month
         self.count = count  # defaultdict in {date:[(title1, pk1), (title2, pk2),]} format
         self.events = all_month_events
-        self.day_contexts = {}
+        self._context = None
 
 #    def add_occurrence(self):
 #        try:
@@ -61,9 +61,8 @@ class GenericCalendar(HTMLCalendar):
 #            self.event.occurrence = []
 #            self.event.occurrence.append(self.day)
 
-    def get_context(self, day=None, weekday=None):
-        context = self.day_contexts.get((day, weekday), None)
-        if context is None:
+    def get_context(self, day=None):
+        if self._context is None:
             now = get_now()
             context = {
                 'URLS_NAMESPACE': URLS_NAMESPACE,
@@ -71,21 +70,10 @@ class GenericCalendar(HTMLCalendar):
                 'CALENDAR_HOUR_FORMAT': CALENDAR_HOUR_FORMAT,
                 'calendar': self,
                 'is_current_day': False,
-                'events': [],
-                'num_events': len(self.count.get(day, [])),
                 'now': now,
             }
-            if day:
-                context['day'] = day
-                context['day_url'] = self.get_day_url(day)
-                context['month_start_date'] = date(self.yr, self.mo, 1)
-            if weekday:
-                context['weekday'] = weekday
-                context['cssclass'] = self.cssclasses[weekday],
-                context['weekday_full'] = WEEKDAYS[weekday]
-                context['weekday_abbr'] = WEEKDAYS_ABBR[weekday]
-            self.day_contexts[(day, weekday)] = context
-        return context
+            self._context = context
+        return dict(self._context)
 
     def check_if_cancelled(self):
         d = date(self.yr, self.mo, self.day)
@@ -137,12 +125,15 @@ class EventCalendar(GenericCalendar):
         """Return a day as a table cell."""
         super(EventCalendar, self).formatday(day, weekday)
         now = get_now()
-        context = self.get_context(day)
-        context.update({
-            'weekday': weekday,
-            'cssclass': self.cssclasses[weekday],
-            'popover_template': popover_template,
-        })
+        context = self.get_context()
+        context['events'] = []
+        context['day'] = day
+        context['day_url'] = self.get_day_url(day)
+        context['month_start_date'] = date(self.yr, self.mo, 1)
+        context['weekday'] = weekday
+        context['cssclass'] = self.cssclasses[weekday]
+        context['popover_template'] = popover_template
+        context['num_events'] = len(self.count.get(day, [])),
         try:
             processed_date = date(self.yr, self.mo, day)
         except ValueError:
