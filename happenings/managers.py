@@ -65,7 +65,7 @@ class EventManager(models.Manager):
             ((dstart_yr | dend_yr) & (dstart_mo | dend_yr)),  # non-repeating
             Q(end_repeat=None) | Q(end_repeat__gte=ym_first),
             start_date__lte=ym_last  # no events that haven't started yet
-        ).filter(**kwargs).prefetch_related(*pref).distinct()
+        ).filter(**kwargs).prefetch_related(*pref).order_by('start_date').distinct()
 
 #    XXX These are no longer used since all_month_events() (above) was created.
 #    def month_events(self, year, month, category=None, tag=None):
