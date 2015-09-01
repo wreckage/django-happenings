@@ -250,9 +250,10 @@ in settings. If you have enabled language switching for your site then calendar
 will switch languages too. If you are not using legacy calendars then
 ``CALENDAR_LOCALE`` settings is not required anymore. 
 
-Note that only month names and weekday names are translated for all langauges supported by django.
+Note that only month names and weekday names are translated for all languages supported by django.
 Some django-happenings specific strings are only available in English (like "When/Description" in
-event details)
+event details). You can generate your own translations (pull requests are welcome) or you may copy
+and change templates.
 
 
 Tests
