@@ -252,7 +252,7 @@ will switch languages too. If you are not using legacy calendars then
 
 Note that only month names and weekday names are translated for all langauges supported by django.
 Some django-happenings specific strings are only available in English (like "When/Description" in
-evene details)
+event details)
 
 
 Tests
