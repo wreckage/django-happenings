@@ -1,3 +1,10 @@
+Version 0.3.3 (September 1, 2015)
+-----------------------------
+  * Yaroslav Klyuyev <https://github.com/imposeren> made some improvements
+  to the code regarding Django templates and i18n. See the pull request 
+  on github: https://github.com/wreckage/django-happenings/pull/16
+
+
 Version 0.3.1 (August 25, 2015)
 -----------------------------
 
