@@ -58,11 +58,11 @@ def month_display(year, month, all_month_events,
                 if item[1] == event.pk:
                     l.insert(0, l.pop(l.index(item)))
 
-    args = (year, month, count, all_month_events, start_day, CALENDAR_LOCALE)
+    args = (year, month, count, all_month_events, start_day)
     if not mini:
-        html_cal = EventCalendar(*args).formatmonth(year, month)
+        html_cal = EventCalendar(*args).formatmonth(year, month, net=net, qs=qs)
     else:
-        html_cal = MiniEventCalendar(*args).formatmonth(year, month)
+        html_cal = MiniEventCalendar(*args).formatmonth(year, month, net=net, qs=qs)
 
     nxt, prev = get_next_and_prev(net)
     extra_qs = ('&' + '&'.join(qs)) if qs else ''

@@ -8,6 +8,8 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
+import six
+
 from happenings.models import Event
 
 
@@ -29,16 +31,29 @@ class SetMeUp(TestCase):
 
     def clean_whitespace(self, response):
         """Remove all newlines and all occurances of multiple spaces."""
-        response.content = response.content.replace(b'\n', b'')
+        if hasattr(response, 'content'):
+            is_response = True
+            content = response.content
+        else:
+            is_response = False
+            content = response
+
+        if isinstance(content, six.text_type):
+            content = content.encode('utf-8')
+
+        content = content.replace(b'\n', b'')
 
         for num_spaces in range(7, 2, -1):
             # reduce all multiple spaces to 2 spaces.
             # We can process here only `num_spaces=3` with the same result, but it will be slower
-            while response.content.find(b' '*num_spaces) >= 0:
-                response.content = response.content.replace(b' '*num_spaces, b' '*2)
-        response.content = response.content.replace(b' '*2, b'')
-
-
+            while content.find(b' '*num_spaces) >= 0:
+                content = content.replace(b' '*num_spaces, b' '*2)
+        content = content.replace(b' '*2, b'')
+        if is_response:
+            response.content = content
+        else:
+            content = content.decode('utf-8')
+        return content
 
 def create_event(created_by, title, description, all_day=False,
                  start_date=None, end_date=None, categories=None, tags=None,

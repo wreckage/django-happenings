@@ -130,15 +130,15 @@ class EventListViewDisplayTest(SetMeUp):
         cal = displays.month_display(
             2014, 3, [], 0, 0, ''
         )
-        s = '</a></th></tr>\n<tr><th class="mon">Mon</th><th class="tue"'
-        self.assertIn(s, cal)
+        s = '</a></th></tr><tr><th class="mon">Mon</th><th class="tue"'
+        self.assertIn(s, self.clean_whitespace(cal))
 
         # start on Sunday
         cal = displays.month_display(
             2014, 3, [], 6, 0, ''
         )
-        s = '</a></th></tr>\n<tr><th class="sun">Sun</th><th class="mon"'
-        self.assertIn(s, cal)
+        s = '</a></th></tr><tr><th class="sun">Sun</th><th class="mon"'
+        self.assertIn(s, self.clean_whitespace(cal))
 
     def test_list_view_calendar_current_day(self):
         """

@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 # python lib:
-from calendar import LocaleHTMLCalendar, month_name
+from calendar import LocaleHTMLCalendar, HTMLCalendar, month_name
 from datetime import date
 import sys
 
@@ -10,12 +10,14 @@ import sys
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
+from django.utils.dates import WEEKDAYS, WEEKDAYS_ABBR
+from django.utils.html import mark_safe
 
 # thirdparties:
 import six
 
 # happenings:
-from .common import get_now
+from .common import get_now, get_next_and_prev
 
 URL = getattr(settings, "CALENDAR_URL", 'calendar')
 URLS_NAMESPACE = getattr(settings, "CALENDAR_URLS_NAMESPACE", 'calendar')
@@ -43,7 +45,143 @@ if not CALENDAR_HOUR_FORMAT:
         CALENDAR_HOUR_FORMAT = CALENDAR_HOUR_FORMAT.strip(':')
 
 
-class GenericCalendar(LocaleHTMLCalendar):
+class GenericCalendar(HTMLCalendar):
+    def __init__(self, year, month, count, all_month_events, *args):
+        super(GenericCalendar, self).__init__(*args)
+        self.yr = year
+        self.mo = month
+        self.count = count  # defaultdict in {date:[(title1, pk1), (title2, pk2),]} format
+        self.events = all_month_events
+        self._context = None
+
+#    def add_occurrence(self):
+#        try:
+#            self.event.occurrence.append(self.day)
+#        except AttributeError:
+#            self.event.occurrence = []
+#            self.event.occurrence.append(self.day)
+
+    def get_context(self, day=None):
+        if self._context is None:
+            now = get_now()
+            context = {
+                'URLS_NAMESPACE': URLS_NAMESPACE,
+                'CALENDAR_TIME_FORMAT': CALENDAR_TIME_FORMAT,
+                'CALENDAR_HOUR_FORMAT': CALENDAR_HOUR_FORMAT,
+                'calendar': self,
+                'is_current_day': False,
+                'now': now,
+            }
+            self._context = context
+        return dict(self._context)
+
+    def check_if_cancelled(self):
+        d = date(self.yr, self.mo, self.day)
+        is_cancelled = self.event.check_if_cancelled(d)
+        if is_cancelled:
+            self.title += " (CANCELLED)"
+        return is_cancelled
+
+    def get_day_url(self, day):
+        if URLS_NAMESPACE:
+            url_name = '%s:day_list' % (URLS_NAMESPACE)
+        else:
+            url_name = 'day_list'
+        return reverse(url_name, args=(self.yr, self.mo, day))
+
+    def formatmonth(self, theyear, themonth, withyear=True, net=None, qs=None, template='happenings/partials/calendar/month_table.html'):
+        """Return a formatted month as a table."""
+        context = self.get_context()
+        context['month_start_date'] = date(self.yr, self.mo, 1)
+        context['week_rows'] = []
+        for week in self.monthdays2calendar(theyear, themonth):
+            week_row = []
+            for day, weekday in week:
+                week_row.append(self.formatday(day, weekday))
+            context['week_rows'].append(week_row)
+
+        nxt, prev = get_next_and_prev(net)
+        extra_qs = ('&' + '&'.join(qs)) if qs else ''
+        context['prev_qs'] = mark_safe('?cal_prev=%d%s' % (prev, extra_qs))
+        context['next_qs'] = mark_safe('?cal_next=%d%s' % (nxt, extra_qs))
+        context['withyear'] = withyear
+        return render_to_string(template, context)
+
+
+class EventCalendar(GenericCalendar):
+
+    def popover_helper(self):
+        self.when = ''
+        self.where = ''
+        self.desc = ''
+        self.title2 = ''
+
+    def formatday(
+            self, day, weekday,
+            day_template='happenings/partials/calendar/day_cell.html',
+            noday_template='happenings/partials/calendar/day_noday_cell.html',
+            popover_template='happenings/partials/calendar/popover.html',
+            ):
+        """Return a day as a table cell."""
+        super(EventCalendar, self).formatday(day, weekday)
+        now = get_now()
+        context = self.get_context()
+        context['events'] = []
+        context['day'] = day
+        context['day_url'] = self.get_day_url(day)
+        context['month_start_date'] = date(self.yr, self.mo, 1)
+        context['weekday'] = weekday
+        context['cssclass'] = self.cssclasses[weekday]
+        context['popover_template'] = popover_template
+        context['num_events'] = len(self.count.get(day, [])),
+        try:
+            processed_date = date(self.yr, self.mo, day)
+        except ValueError:
+            # day is out of range for month
+            processed_date = None
+
+        context['month_start_date'] = date(self.yr, self.mo, 1)
+
+        if day == 0:
+            template = noday_template
+        else:
+            template = day_template
+
+        if now.date() == processed_date:
+            context['is_current_day'] = True
+
+        if processed_date and (day in self.count):
+            for item in self.count[day]:
+                self.pk = item[1]
+                self.title = item[0]
+                for event in self.events:
+                    if event.pk == self.pk:
+                        event.check_if_cancelled(processed_date)
+                        # allow to use event.last_check_if_cancelled and populate event.title.extra
+
+                        context['events'].append(event)
+
+        return render_to_string(template, context)
+
+
+class MiniEventCalendar(EventCalendar):
+    def __init__(self, *args):
+        super(MiniEventCalendar, self).__init__(*args)
+        # Change count from a defaultdict to a regular dict, so that when we
+        # try and check if there are days in count, they won't be added if they
+        # aren't there.
+        self.count = dict(self.count)
+
+    def formatday(self, day, weekday):
+        """Return a day as a table cell."""
+        return super(MiniEventCalendar, self).formatday(
+            day, weekday,
+            day_template='happenings/partials/calendar/mini_day_cell.html',
+            popover_template='happenings/partials/calendar/mini_popover.html',
+        )
+
+
+class LegacyGenericCalendar(LocaleHTMLCalendar):
     def __init__(self, year, month, count, all_month_events, *args):
         if len(args) < 2:
             args = args + (CALENDAR_LOCALE, )
@@ -109,84 +247,10 @@ class GenericCalendar(LocaleHTMLCalendar):
         Change colspan to "5", add "today" button, and return a month
         name as a table row.
         """
-        template = 'happenings/partials/calendar/month_row.html'
-        context = {
-            'calendar': self,
-            'theyear': theyear,
-            'themonth': themonth,
-            'withyear': withyear,
-            'display_month': self.get_display_month(themonth),
-        }
-        return render_to_string(template, context)
+        display_month = month_name[themonth]
 
-
-class EventCalendar(GenericCalendar):
-
-    def popover_helper(self):
-        self.when = ''
-        self.where = ''
-        self.desc = ''
-        self.title2 = ''
-
-    def formatday(
-            self, day, weekday,
-            day_template='happenings/partials/calendar/day_cell.html',
-            noday_template='happenings/partials/calendar/day_noday_cell.html',
-            popover_template='happenings/partials/calendar/popover.html',
-            ):
-        """Return a day as a table cell."""
-        super(EventCalendar, self).formatday(day, weekday)
-        now = get_now()
-        context = {
-            'URLS_NAMESPACE': URLS_NAMESPACE,
-            'CALENDAR_TIME_FORMAT': CALENDAR_TIME_FORMAT,
-            'CALENDAR_HOUR_FORMAT': CALENDAR_HOUR_FORMAT,
-            'calendar': self,
-            'day': day, 'weekday': weekday,
-            'cssclass': self.cssclasses[weekday],
-            'day_url': self.day_url,
-            'is_current_day': False,
-            'events': [],
-            'popover_template': popover_template,
-            'num_events': len(self.count.get(day, [])),
-        }
-        try:
-            processed_date = date(self.yr, self.mo, day)
-        except ValueError:
-            # day is out of range for month
-            processed_date = None
-
-        display_month = self.get_display_month(self.mo)
-
-        context['display_month'] = display_month
-
-        if day == 0:
-            template = noday_template
-        else:
-            template = day_template
-
-        if now.date() == processed_date:
-            context['is_current_day'] = True
-
-        if processed_date and (day in self.count):
-            for item in self.count[day]:
-                self.pk = item[1]
-                self.title = item[0]
-                for event in self.events:
-                    if event.pk == self.pk:
-                        event.check_if_cancelled(processed_date)
-                        # allow to use event.last_check_if_cancelled and populate event.title.extra
-
-                        context['events'].append(event)
-
-        return render_to_string(template, context)
-
-    def formatmonthname(self, theyear, themonth, withyear=True):
-        """
-        Change colspan to "5", add "today" button, and return a month
-        name as a table row.
-        """
-        display_month = self.get_display_month(themonth)
+        if isinstance(display_month, six.binary_type) and self.encoding:
+            display_month = display_month.decode(self.encoding)
 
         if withyear:
             s = u'%s %s' % (display_month, theyear)
@@ -197,7 +261,8 @@ class EventCalendar(GenericCalendar):
                 'Today</button> %s</th></tr>' % s)
 
 
-class LegacyEventCalendar(GenericCalendar):
+
+class LegacyEventCalendar(LegacyGenericCalendar):
     def popover_helper(self):
         """Populate variables used to build popovers."""
         # when
@@ -280,24 +345,7 @@ class LegacyEventCalendar(GenericCalendar):
         return out + self.end
 
 
-class MiniEventCalendar(EventCalendar):
-    def __init__(self, *args):
-        super(MiniEventCalendar, self).__init__(*args)
-        # Change count from a defaultdict to a regular dict, so that when we
-        # try and check if there are days in count, they won't be added if they
-        # aren't there.
-        self.count = dict(self.count)
-
-    def formatday(self, day, weekday):
-        """Return a day as a table cell."""
-        return super(MiniEventCalendar, self).formatday(
-            day, weekday,
-            day_template='happenings/partials/calendar/mini_day_cell.html',
-            popover_template='happenings/partials/calendar/mini_popover.html',
-        )
-
-
-class LegacyMiniEventCalendar(GenericCalendar):
+class LegacyMiniEventCalendar(LegacyGenericCalendar):
     def __init__(self, *args):
         super(MiniEventCalendar, self).__init__(*args)
         # Change count from a defaultdict to a regular dict, so that when we

@@ -3,8 +3,10 @@ from __future__ import unicode_literals
 from datetime import datetime
 from json import dumps, loads
 
-from django.http import HttpResponse
 from django.core import serializers
+from django.http import HttpResponse
+from django.utils.encoding import force_text
+from django.utils.functional import Promise
 
 
 class JSONResponseMixin(object):
@@ -38,6 +40,10 @@ class JSONResponseMixin(object):
             cal.update(l)
             return dumps(cal)
         else:  # day list view
+            for key, val in context.items():
+                if isinstance(val, Promise):
+                    context[key] = force_text(val)
+
             return dumps(self.get_day_context_dict(context))
 
     @staticmethod

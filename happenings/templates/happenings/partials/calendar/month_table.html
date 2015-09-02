@@ -1,0 +1,29 @@
+{% load i18n weekday %}
+<table border="0" cellpadding="0" cellspacing="0" class="month">
+  {% block month_name_row %}
+  <tr>
+    <th colspan="1" class="month-arrow-left"><a href="{{ prev_qs }}">&larr;</a></th>
+    <th colspan="5" class="month">
+      <button id="cal-today-btn" class="btn btn-small">{% trans "Today" %}</button>
+      {% if withyear %}{{ month_start_date|date:"F Y" }}{% else %}{{ month_start_date|date:"F" }}{% endif %}
+    </th>
+    <th colspan="1" class="month-arrow-right"><a href="{{ next_qs }}">&rarr;</a></th>
+  </tr>
+  {% endblock month_name_row %}
+  {% block week_header_row %}
+    <tr>
+    {% for weekday_num in calendar.iterweekdays %}
+      <th class="{{ weekday_num|weekday_css_class:calendar }}">{% weekday weekday_num full=False %}</th>
+    {% endfor %}
+    </tr>
+  {% endblock week_header_row %}
+  {% block week_rows %}
+    {% for week_row in week_rows %}
+      <tr>
+      {% for formatted_day in week_row %}
+        {{ formatted_day }}
+      {% endfor %}
+      </tr>
+    {% endfor %}
+  {% endblock week_rows %}
+</table>
