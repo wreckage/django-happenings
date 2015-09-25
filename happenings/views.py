@@ -126,7 +126,8 @@ class EventMonthView(GenericEventView):
 
         start_day = getattr(settings, "CALENDAR_START_DAY", 0)
         context['calendar'] = month_display(
-            year, month, all_month_events, start_day, self.net, qs, mini
+            year, month, all_month_events, start_day, self.net, qs, mini,
+            request=self.request,
         )
 
         context['show_events'] = False

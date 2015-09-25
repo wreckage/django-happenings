@@ -46,12 +46,14 @@ if not CALENDAR_HOUR_FORMAT:
 
 
 class GenericCalendar(HTMLCalendar):
-    def __init__(self, year, month, count, all_month_events, *args):
-        super(GenericCalendar, self).__init__(*args)
+    def __init__(self, year, month, count, all_month_events, firstweekday=0, request=None, base_context=None, *args, **kwargs):
+        super(GenericCalendar, self).__init__(firstweekday)
         self.yr = year
         self.mo = month
         self.count = count  # defaultdict in {date:[(title1, pk1), (title2, pk2),]} format
         self.events = all_month_events
+        self.request = request
+        self.base_context = base_context or {}
         self._context = None
 
 #    def add_occurrence(self):
@@ -64,14 +66,16 @@ class GenericCalendar(HTMLCalendar):
     def get_context(self, day=None):
         if self._context is None:
             now = get_now()
-            context = {
+            context = dict(self.base_context)
+            context.update({
                 'URLS_NAMESPACE': URLS_NAMESPACE,
                 'CALENDAR_TIME_FORMAT': CALENDAR_TIME_FORMAT,
                 'CALENDAR_HOUR_FORMAT': CALENDAR_HOUR_FORMAT,
                 'calendar': self,
                 'is_current_day': False,
                 'now': now,
-            }
+                'request': self.request,
+            })
             self._context = context
         return dict(self._context)
 

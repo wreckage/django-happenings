@@ -20,8 +20,8 @@ register = Library()
 start_day = getattr(settings, "CALENDAR_START_DAY", 0)
 
 
-@register.simple_tag
-def show_calendar(req, mini=False):
+@register.simple_tag(takes_context=True)
+def show_calendar(context, req, mini=False, inherit_context=False):
     now = get_now()
     net, category, tag = get_net_category_tag(req)
     year = now.year
@@ -39,8 +39,10 @@ def show_calendar(req, mini=False):
     qs = req.META['QUERY_STRING']
     if qs:  # get any querystrings that are not next/prev
         qs = get_qs(qs)
+    if not inherit_context:
+        context = {}
     return month_display(
-        year, month, all_month_events, start_day, net, qs, mini=mini
+        year, month, all_month_events, start_day, net, qs, mini=mini, request=req, context=context,
     )
 
 
