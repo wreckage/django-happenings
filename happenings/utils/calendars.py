@@ -169,8 +169,8 @@ class EventCalendar(GenericCalendar):
 
 
 class MiniEventCalendar(EventCalendar):
-    def __init__(self, *args):
-        super(MiniEventCalendar, self).__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super(MiniEventCalendar, self).__init__(*args, **kwargs)
         # Change count from a defaultdict to a regular dict, so that when we
         # try and check if there are days in count, they won't be added if they
         # aren't there.
