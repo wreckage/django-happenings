@@ -143,6 +143,14 @@ your own style. Note also that, because the request object needs to be
 included in the tag, you must include "django.core.context_processors.request"
 in TEMPLATE_CONTEXT_PROCESSORS in your settings.py.
 
+If you are using custom templates for calendar and want to access all variables
+from current template context then you can call ``show_calendar`` tag with
+``inherit_context=True`` argument:
+
+    <div id="event-calendar">
+        {% show_calendar request inherit_context=True %}
+    </div>
+
 Include ``upcoming_events`` in your template like this::
 
     {% upcoming_events %}
