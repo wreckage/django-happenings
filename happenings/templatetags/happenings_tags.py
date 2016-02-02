@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import heapq
 
-from django.template import Library
+from django.template import Library, TemplateSyntaxError
 from django.conf import settings
 from django.utils import timezone
 
@@ -20,8 +20,11 @@ register = Library()
 start_day = getattr(settings, "CALENDAR_START_DAY", 0)
 
 
-@register.simple_tag
-def show_calendar(req, mini=False):
+@register.simple_tag(takes_context=True)
+def show_calendar(context, req=None, mini=False, inherit_context=False):
+    req = req or context.get('request', None)
+    if not (req and hasattr(req, 'path') and hasattr(req, 'META')):
+        raise TemplateSyntaxError(r"{% show_calendar %} should be called with HttpRequest instance as first argument or it should be available as `request` variable in template context")
     now = get_now()
     net, category, tag = get_net_category_tag(req)
     year = now.year
@@ -39,8 +42,10 @@ def show_calendar(req, mini=False):
     qs = req.META['QUERY_STRING']
     if qs:  # get any querystrings that are not next/prev
         qs = get_qs(qs)
+    if not inherit_context:
+        context = {}
     return month_display(
-        year, month, all_month_events, start_day, net, qs, mini=mini
+        year, month, all_month_events, start_day, net, qs, mini=mini, request=req, context=context,
     )
 
 

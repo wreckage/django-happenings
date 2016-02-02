@@ -19,7 +19,7 @@ class ShowCalendarTemplateTagTest(TestCase):
 
     def test_show_calendar_no_events(self):
         req = self.factory.get(self.url)
-        cal = show_calendar(req)
+        cal = show_calendar({}, req)
         self.assertIn(str(now.month), cal)
         self.assertIn(str(now.year), cal)
         self.assertNotIn('calendar-event', cal)
@@ -50,7 +50,7 @@ class ShowCalendarTemplateTagTest(TestCase):
         event2.save()
 
         req = self.factory.get(self.url, {'cal_category': 'birthday'})
-        cal = show_calendar(req, mini=True)
+        cal = show_calendar({}, req, mini=True)
         self.assertIn(str(now.month), cal)
         self.assertIn(str(now.year), cal)
         self.assertNotIn(event.title, cal)

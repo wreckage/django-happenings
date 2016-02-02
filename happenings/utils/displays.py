@@ -41,7 +41,7 @@ def add_occurrences(events, count):
 
 
 def month_display(year, month, all_month_events,
-                  start_day, net, qs, mini=False):
+                  start_day, net, qs, mini=False, request=None, context=None):
     """
     A function that returns an html calendar for the given
     month in the given year, with the number of events for that month
@@ -60,9 +60,9 @@ def month_display(year, month, all_month_events,
 
     args = (year, month, count, all_month_events, start_day)
     if not mini:
-        html_cal = EventCalendar(*args).formatmonth(year, month, net=net, qs=qs)
+        html_cal = EventCalendar(request=request, context=context, *args).formatmonth(year, month, net=net, qs=qs)
     else:
-        html_cal = MiniEventCalendar(*args).formatmonth(year, month, net=net, qs=qs)
+        html_cal = MiniEventCalendar(request=request, context=context, *args).formatmonth(year, month, net=net, qs=qs)
 
     nxt, prev = get_next_and_prev(net)
     extra_qs = ('&' + '&'.join(qs)) if qs else ''
